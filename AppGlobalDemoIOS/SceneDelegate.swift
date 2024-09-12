@@ -1,8 +1,8 @@
 //
 //  SceneDelegate.swift
-//  AppGlobalDemoIOS
+//  AppGlobalDemo
 //
-//  Created by Bhupender Shekhwat on 11/09/24.
+//  Created by Anis Mansuri on 09/09/24.
 //
 
 import UIKit

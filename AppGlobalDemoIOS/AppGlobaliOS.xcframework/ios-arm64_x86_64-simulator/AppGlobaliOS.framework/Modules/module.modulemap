@@ -1,0 +1,6 @@
+framework module AppGlobaliOS {
+  umbrella header "AppGlobaliOS.h"
+  export *
+
+  module * { export * }
+}

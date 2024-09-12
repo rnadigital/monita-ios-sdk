@@ -1,19 +1,21 @@
 //
 //  AppDelegate.swift
-//  AppGlobalDemoIOS
+//  AppGlobalDemo
 //
-//  Created by Bhupender Shekhwat on 11/09/24.
+//  Created by Anis Mansuri on 09/09/24.
 //
 
 import UIKit
-
+import Firebase
+import AppGlobaliOS
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        FirebaseApp.configure()
+        AppGlobal.configure()
         return true
     }
 
