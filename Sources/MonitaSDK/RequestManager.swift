@@ -59,14 +59,14 @@ class RequestManager {
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let venderName = vender.vendorName
+        let venderName = vender.vendorName ?? ""
         let bundle = Bundle.main
            
            // Retrieve the version number
-        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        //let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
         let timestamp = Date().timeIntervalSince1970.description
        
-        let deviceModel = UIDevice.current.model
+        //let deviceModel = UIDevice.current.model
         let systemVersion = UIDevice.current.systemVersion
         let urlToSend = requestDetails["url"] as? String ?? ""
         let methodToSendt = requestDetails["method"] as? String ?? ""

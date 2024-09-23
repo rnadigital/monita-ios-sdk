@@ -3,6 +3,7 @@
 
 import Foundation
 import UIKit
+
 extension UserDefaults {
     enum Keys: String {
         case requestListCall = "RequestListCall"
@@ -59,22 +60,9 @@ public class MonitaSDK: NSObject {
     
     // Check if it's time to fetch the configuration and do it if needed
     private func checkAndFetchConfiguration() {
-        let userDefaults = UserDefaults.standard
-        
-        // Get the last fetch date from UserDefaults
-        let lastFetchDate = userDefaults.object(forKey: lastFetchDateKey) as? Date
-        let currentDate = Date()
-//
-//        if let lastFetchDate = lastFetchDate, currentDate.timeIntervalSince(lastFetchDate) < fetchInterval {
-//            // No need to fetch the configuration yet
-//            return
-//        }
-        
         // Fetch the configuration from the server
         MonitaSDK.shared.fetchConfiguration()
         
-        // Update the last fetch date in UserDefaults
-        userDefaults.set(currentDate, forKey: lastFetchDateKey)
     }
     
     // Fetch configuration from the server
@@ -105,34 +93,40 @@ public class MonitaSDK: NSObject {
     }
     
     func fetchConfigurationLocally() {
+        print("Bundle.allBundles")
+        print(Bundle.allBundles)
+        print(Bundle.allFrameworks)
         
-        guard let bundle = Bundle(identifier: Constant.bundle),  let url = bundle.url(forResource: "AppGlobalConfigNew", withExtension: "json") else {
-                print("Failed to find AppGlobalConfig.json in bundle.")
-                return
-            }
+//        guard let bundle = Bundle(identifier: Constant.bundle),  let url = bundle.url(forResource: "AppGlobalConfigNew", withExtension: "json") else {
+//                print("Failed to find AppGlobalConfig.json in bundle.")
+//            
+//                return
+//            }
 
-            do {
+//            do {
                 // Load the file data
-                let data = try Data(contentsOf: url)
+                guard let data = jsonFIle.data(using: .utf8) else {
+                    print("Failed to find AppGlobalConfig.json in bundle.")
+                    return
+                }
                 print("Step 1")
                 print("Configuration Detail")
                 print(String(data: data, encoding: .utf8) ?? "")
                 // Decode the JSON data
-                let decoder = JSONDecoder()
-                RequestManager.shared.loadConfiguration(from: data)
+                _ = RequestManager.shared.loadConfiguration(from: data)
                 
-            } catch {
-                print("Error decoding JSON: \(error)")
-                return
-            }
+//            } catch {
+//                print("Error decoding JSON: \(error)")
+//                return
+//            }
     }
     public static func getConfigList() -> String {
         var string = ""
         let vendors = RequestManager.shared.configuration?.vendors ?? []
         
         for vendor in vendors {
-            string.append("Name: \(vendor.vendorName)\n")
-            string.append("Patterns: \(vendor.urlPatternMatches)\n\n")
+            string.append("Name: \(vendor.vendorName ?? "")\n")
+            string.append("Patterns: \(vendor.urlPatternMatches ?? [])\n\n")
             string.append("---------------------------------------------\n\n")
         }
         return string
@@ -150,7 +144,7 @@ public class MonitaSDK: NSObject {
     }
     public static func getInterceptedRequestListAll() -> String {
         var string = ""
-        var lists = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
+        let lists = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
         
         for list in lists {
             string.append("\(list)\n")
@@ -158,5 +152,70 @@ public class MonitaSDK: NSObject {
         }
         return string
     }
+    let jsonFIle = """
+{
+  "monitoringVersion": "23",
+  "vendors": [
+    {
+      "vendorName": "Google Analytics",
+      "urlPatternMatches": [
+        "https://www.google-analytics.com/g/collect",
+        "firebase-settings.crashlytics",
+        "fcm.googleapis.com",
+        "firebase.com",
+        "firebase.google.com",
+        "firebase.googleapis.com",
+        "firebaseapp.com",
+        "firebaseappcheck.googleapis.com",
+        "firebasedynamiclinks-ipv4.googleapis.com",
+        "firebasedynamiclinks-ipv6.googleapis.com",
+        "firebasedynamiclinks.googleapis.com",
+        "firebaseinappmessaging.googleapis.com",
+        "firebaseinstallations.googleapis.com",
+        "firebaseio.com",
+        "firebaselogging-pa.googleapis.com",
+        "firebaselogging.googleapis.com",
+        "firebaseperusertopics-pa.googleapis.com",
+        "firebaseremoteconfig.googleapis.com"
+      ],
+      "eventParamter": "cv",
+      "execludeParameters": [],
+      "filters": []
+    },
+    {
+      "vendorName": "Facebook (Meta Pixel)",
+      "urlPatternMatches": [
+        "facebook.com/tr/"
+      ],
+      "eventParamter": "ev",
+      "execludeParameters": [],
+      "filters": [
+        {
+          "key": "dl",
+          "op": "eq",
+          "val": [
+            "stuff"
+          ]
+        }
+      ]
+    },
+    {
+      "vendorName": "Monita",
+      "urlPatternMatches": [
+        "https://us-central1-tag-monitoring-dev.cloudfunctions.net/monalytics"
+      ],
+      "eventParamter": "{{gtm}}-{{gdid}}-{{regex::(?<=https:\\/\\/)[\\w|-]*::url}}-1",
+      "execludeParameters": [],
+      "filters": [
+        {
+          "key": "type",
+          "op": "blank"
+        }
+      ]
+    }
+  ],
+  "allowManualMonitoring": true
+}
+"""
 }
 

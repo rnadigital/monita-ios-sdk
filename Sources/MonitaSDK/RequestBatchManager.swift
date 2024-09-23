@@ -27,8 +27,8 @@ class RequestBatchManager {
     private func flushBatch() {
         guard !requestQueue.isEmpty else { return }
         
-        let batch = requestQueue
-        requestQueue.removeAll()
+        //let batch = requestQueue
+        //requestQueue.removeAll()
         
         // Send batch to server
         //RequestManager.shared.sendToServer(requestDetails: ["batch": batch], vender: <#Vendor#>)

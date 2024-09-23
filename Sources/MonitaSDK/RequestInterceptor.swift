@@ -41,7 +41,7 @@ class RequestInterceptor: URLProtocol {
     
     override func startLoading() {
         // Mark the request as handled
-        var newRequest = request
+        let newRequest = request
         // Intercept and handle the request here
         guard let url = request.url else {
             client?.urlProtocol(self, didFailWithError: NSError(domain: "Invalid URL", code: 0, userInfo: nil))
@@ -57,7 +57,7 @@ class RequestInterceptor: URLProtocol {
         let task = URLSession.shared.dataTask(with: newRequest) { data, response, error in
             
             // Save request details to UserDefaults
-            var list = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
+            _ = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
             if let error = error {
                 self.client?.urlProtocol(self, didFailWithError: error)
             } else if let data = data, let response = response {
@@ -66,7 +66,6 @@ class RequestInterceptor: URLProtocol {
                 self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .allowed)
                 self.client?.urlProtocol(self, didLoad: data)
             }
-//            print("requestDetails")
             //print(requestDetails)
             self.client?.urlProtocolDidFinishLoading(self)
         }
@@ -144,34 +143,3 @@ extension URLSession {
         return custom_dataTask(with: request, completionHandler: completionHandler)
     }
 }
-
-
-//extension URLSession {
-//    
-//    static let swizzleDataTaskWithURL: Void = {
-//        let originalSelector = #selector(URLSession.dataTask(with:))
-//        let swizzledSelector = #selector(URLSession.custom_dataTask(with:))
-//        
-//        guard let originalMethod = class_getInstanceMethod(URLSession.self, originalSelector),
-//              let swizzledMethod = class_getInstanceMethod(URLSession.self, swizzledSelector) else {
-//            return
-//        }
-//        
-//        let didAddMethod = class_addMethod(URLSession.self, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
-//        
-//        if didAddMethod {
-//            class_replaceMethod(URLSession.self, swizzledSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod))
-//        } else {
-//            method_exchangeImplementations(originalMethod, swizzledMethod)
-//        }
-//    }()
-//    
-//    @objc func custom_dataTask(with url: URL) -> URLSessionDataTask {
-//        // Optionally inspect or modify the URL here
-//        print("Intercepted URL in swizzled dataTask: \(url)")
-//        
-//        // Call the swizzled implementation
-//        return custom_dataTask(with: url)
-//    }
-//}
-
