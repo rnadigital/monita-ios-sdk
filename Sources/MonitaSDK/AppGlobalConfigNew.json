@@ -1,0 +1,63 @@
+{
+  "monitoringVersion": "23",
+  "vendors": [
+    {
+      "vendorName": "Google Analytics",
+      "urlPatternMatches": [
+        "https://www.google-analytics.com/g/collect",
+        "firebase-settings.crashlytics",
+        "fcm.googleapis.com",
+        "firebase.com",
+        "firebase.google.com",
+        "firebase.googleapis.com",
+        "firebaseapp.com",
+        "firebaseappcheck.googleapis.com",
+        "firebasedynamiclinks-ipv4.googleapis.com",
+        "firebasedynamiclinks-ipv6.googleapis.com",
+        "firebasedynamiclinks.googleapis.com",
+        "firebaseinappmessaging.googleapis.com",
+        "firebaseinstallations.googleapis.com",
+        "firebaseio.com",
+        "firebaselogging-pa.googleapis.com",
+        "firebaselogging.googleapis.com",
+        "firebaseperusertopics-pa.googleapis.com",
+        "firebaseremoteconfig.googleapis.com"
+      ],
+      "eventParamter": "cv",
+      "execludeParameters": [],
+      "filters": []
+    },
+    {
+      "vendorName": "Facebook (Meta Pixel)",
+      "urlPatternMatches": [
+        "facebook.com/tr/"
+      ],
+      "eventParamter": "ev",
+      "execludeParameters": [],
+      "filters": [
+        {
+          "key": "dl",
+          "op": "eq",
+          "val": [
+            "stuff"
+          ]
+        }
+      ]
+    },
+    {
+      "vendorName": "Monita",
+      "urlPatternMatches": [
+        "https://us-central1-tag-monitoring-dev.cloudfunctions.net/monalytics"
+      ],
+      "eventParamter": "{{gtm}}-{{gdid}}-{{regex::(?<=https:\\/\\/)[\\w|-]*::url}}-1",
+      "execludeParameters": [],
+      "filters": [
+        {
+          "key": "type",
+          "op": "blank"
+        }
+      ]
+    }
+  ],
+  "allowManualMonitoring": true
+}
