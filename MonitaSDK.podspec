@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "MonitaSDK"
-  spec.version      = "1.0.2"
+  spec.version      = "1.0.4"
   spec.summary      = "A short description of MonitaSDK for implementation ."
 
   # This description is used to generate tags and improve search results.
@@ -26,7 +26,7 @@ Pod::Spec.new do |spec|
   #   * Finally, don't worry about the indent, CocoaPods strips it!
   spec.description  =  "longer description of YourLibrary. CocoaPods is smart about how it includes source code. For source files"
 
-  spec.homepage     = "https://github.com/anismansuri63/MonitaSDK"
+  spec.homepage     = "https://github.com/rnadigital/monita-ios-sdk"
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
 
 
@@ -51,10 +51,10 @@ Pod::Spec.new do |spec|
   #  profile URL.
   #
 
-  spec.author             = { "anismansuri63" => "anismansuri63@gmail.com" }
-  # Or just: spec.author    = "anismansuri63"
-  # spec.authors            = { "anismansuri63" => "anismansuri63@gmail.com" }
-  # spec.social_media_url   = "https://twitter.com/anismansuri63"
+  spec.author             = { "bhupenderandroid007" => "contactbhupender123@gmail.com" }
+  # Or just: spec.author    = "bhupenderandroid007"
+  # spec.authors            = { "bhupenderandroid007" => "contactbhupender123@gmail.com@gmail.com" }
+  # spec.social_media_url   = "https://twitter.com/"
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
