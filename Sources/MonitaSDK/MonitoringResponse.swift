@@ -2,7 +2,7 @@
 //  MonitoringResponse.swift
 //  AppGlobaliOS
 //
-//  Created by Anis Mansuri on 11/09/24.
+//  Created by Coderon 11/09/24.
 //
 
 import Foundation
@@ -21,11 +21,36 @@ struct Vendor: Codable {
     let eventParamter: String?
     let execludeParameters: [String]?
     let filters: [Filter]?
+    let filtersJoinOperator: String?
 }
 
 // MARK: - Filter Model
 struct Filter: Codable {
-    let key: String?
-    let op: String?
-    let val: [String]?
+    private let key: String?
+    private let op: String?
+    private let val: [String]?
+    var finalKey: String {
+        return key ?? ""
+    }
+    var finalOp: String {
+        return op ?? ""
+    }
+    var finalVal: [String] {
+        return val ?? []
+    }
 }
+
+
+// Define a struct for the vendor
+//struct Vendor: Codable {
+//    let vendorName: String
+//    let urlPatternMatches: [String]
+//    let execludeParameters: [String] // Note the typo here: "execludeParameters" should be "excludeParameters"
+//    let filters: [String]
+//}
+//
+//// Define a struct for the root JSON object
+//struct MonitoringResponse: Codable {
+//    let monitoringVersion: String
+//    let vendors: [Vendor]
+//}

@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "MonitaSDK"
-  spec.version      = "1.0.4"
+  spec.version      = "1.0.6"
   spec.summary      = "A short description of MonitaSDK for implementation ."
 
   # This description is used to generate tags and improve search results.
@@ -53,7 +53,7 @@ Pod::Spec.new do |spec|
 
   spec.author             = { "bhupenderandroid007" => "contactbhupender123@gmail.com" }
   # Or just: spec.author    = "bhupenderandroid007"
-  # spec.authors            = { "bhupenderandroid007" => "contactbhupender123@gmail.com@gmail.com" }
+  # spec.authors            = { "bhupenderandroid007" => "contactbhupender123@gmail.com" }
   # spec.social_media_url   = "https://twitter.com/"
 
   # ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -79,7 +79,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source       = { :git => "https://github.com/anismansuri63/MonitaSDK.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "https://github.com/rnadigital/monita-ios-sdk", :tag => "#{spec.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #

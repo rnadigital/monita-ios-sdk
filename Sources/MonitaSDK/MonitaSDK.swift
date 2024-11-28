@@ -4,126 +4,145 @@
 import Foundation
 import UIKit
 
-extension UserDefaults {
-    enum Keys: String {
-        case requestListCall = "RequestListCall"
-        case requestList = "RequestList"
-        
-    }
-    func setVal(value: Any, key: Keys) {
-        setValue(value, forKey: key.rawValue)
-    }
-    func getVal(key: Keys) -> Any? {
-        return value(forKey: key.rawValue)
-    }
-}
 
 public class MonitaSDK: NSObject {
+    internal static let logger = MonitaLogger(tagName: "Monita")
+
+    public static let sdk = "ios"
+
+    // please update to match the release version
+    public static let sdkVersion = "1.3.0"
+
+
+    private var mainInstance: MonitaInstance?
+
     static let shared = MonitaSDK()
     let task = URLSession.shared
     private var serverURL: URL?
-                                        //https://storage.googleapis.com/cdn-monita-dev/custom-config/$token.json?v=$unixTime
+    // https://storage.googleapis.com/cdn-monita-dev/custom-config/$token.json?v=$unixTime
     private var configURL: URL {
         let unixTime = "\(Int(Date().timeIntervalSince1970))"
         return URL(string: "https://storage.googleapis.com/cdn-monita-dev/custom-config/\(token).json?v=\(unixTime)")!
     }
-    private let fetchInterval: TimeInterval = 5 * 24 * 60 * 60 // 5 days in seconds
-    private let lastFetchDateKey = "LastFetchDate"
-    var token: String = ""
-    // Call this method in AppDelegate's didFinishLaunchingWithOptions
-    public static func configure() {
-        if let token = Bundle.main.infoDictionary?["MonitaSDKToken"] as? String {
-            MonitaSDK.shared.token = token
-        } else {
-            UIApplication.showAlert(message: "Token not available in plist file")
-        }
 
-        
+    private static let fetchInterval: TimeInterval = 5 * 24 * 60 * 60 // 5 days in seconds
+    private static let lastFetchDateKey = "LastFetchDate"
+    var token: String = ""
+    var fetchLocally = false
+    // Call this method in AppDelegate's didFinishLaunchingWithOptions
+    public static func configure(fetchLocally: Bool = false) {
+        MonitaSDK.shared.fetchLocally = fetchLocally
+        guard let token = Bundle.main.infoDictionary?["MonitaSDKToken"] as? String else {
+            UIApplication.showAlert(message: "Token not available in plist file")
+            return
+        }
+        MonitaSDK.shared.token = token
         // Register the URL Protocol
-       UserDefaults.standard.setVal(value: [], key: .requestListCall)
-       let queue = DispatchQueue(label: "com.example.myqueue", qos: .userInitiated)
-       
-       queue.async {
-           URLProtocol.registerClass(RequestInterceptor.self)
-           // Perform method swizzling for URLSession
-                 URLSession.swizzleDataTask
-//                 URLSession.swizzleDataTaskWithURL
-       }
-       
-       MonitaSDK.shared.checkAndFetchConfiguration()
+        UserDefaults.standard.setVal(value: [], key: .requestListCall)
+        UserDefaults.standard.setVal(value: [], key: .requestList)
+        checkAndFetchConfiguration()
+        MonitaSDK.shared.initialize(
+            tp_id: token,
+            environment: "UAT",
+            sourceAlias: "ios",
+            debug: false,
+            endpoint: "https://dev-stream.getmonita.io/api/v1/",
+            configEndpoint: "https://dev-stream.getmonita.io/api/v1/"
+        )
         
     }
-    func delay(_ delay: Double, closure:@escaping () -> Void) {
+//    func configuration() -> MonitaConfig {
+//        return mainInstance!.config.endpoint
+//    }
+
+    func delay(_ delay: Double, closure: @escaping () -> Void) {
         let when = DispatchTime.now() + delay
         DispatchQueue.main.asyncAfter(deadline: when, execute: closure)
     }
-    
+
     // Check if it's time to fetch the configuration and do it if needed
-    private func checkAndFetchConfiguration() {
+    private static func checkAndFetchConfiguration() {
+        let userDefaults = UserDefaults.standard
+
+        // Get the last fetch date from UserDefaults
+        let lastFetchDate = userDefaults.object(forKey: lastFetchDateKey) as? Date
+        let currentDate = Date()
+//
+//        if let lastFetchDate = lastFetchDate, currentDate.timeIntervalSince(lastFetchDate) < fetchInterval {
+//            // No need to fetch the configuration yet
+//            return
+//        }
+
         // Fetch the configuration from the server
         MonitaSDK.shared.fetchConfiguration()
-        
+
+        // Update the last fetch date in UserDefaults
+        userDefaults.set(currentDate, forKey: lastFetchDateKey)
     }
-    
+
     // Fetch configuration from the server
     private func fetchConfiguration() {
-//
-//        return
-        task.dataTask(with: configURL) {  data, response, error in
-            print("api called")
+        task.dataTask(with: configURL) { data, _, error in
             if let error = error {
                 print("Failed to fetch configuration: \(error)")
                 self.fetchConfigurationLocally()
                 return
             }
-            
+
             guard let data = data else {
                 print("No data received")
                 self.fetchConfigurationLocally()
                 return
             }
-            
+
             let config = RequestManager.shared.loadConfiguration(from: data)
             if config == nil {
+                print("Step 1")
+                print("Config loading failed from monita server")
+                self.fetchConfigurationLocally()
+            } else {
+                print("Step 1")
+                print("Config file loaded from monita server")
+            }
+            if self.fetchLocally {
+                print("Loading from local")
                 self.fetchConfigurationLocally()
             }
+            
         }.resume()
-        
-        
     }
-    
-    func fetchConfigurationLocally() {
-        print("Bundle.allBundles")
-        print(Bundle.allBundles)
-        print(Bundle.allFrameworks)
-        
-//        guard let bundle = Bundle(identifier: Constant.bundle),  let url = bundle.url(forResource: "AppGlobalConfigNew", withExtension: "json") else {
-//                print("Failed to find AppGlobalConfig.json in bundle.")
-//            
-//                return
-//            }
 
-//            do {
-                // Load the file data
-                guard let data = jsonFIle.data(using: .utf8) else {
-                    print("Failed to find AppGlobalConfig.json in bundle.")
-                    return
-                }
-                print("Step 1")
-                print("Configuration Detail")
-                print(String(data: data, encoding: .utf8) ?? "")
-                // Decode the JSON data
-                _ = RequestManager.shared.loadConfiguration(from: data)
-                
-//            } catch {
-//                print("Error decoding JSON: \(error)")
-//                return
-//            }
+    func fetchConfigurationLocally() {
+//        guard let bundle = Bundle(identifier: Constant.bundle), let url = bundle.url(forResource: "AppGlobalConfigNew", withExtension: "json") else {
+//            print("Failed to find AppGlobalConfig.json in bundle.")
+//            return
+//        }
+        
+        guard let data = jsonFIle.data(using: .utf8) else {
+            print("Failed to find AppGlobalConfig.json in bundle.")
+            return
+        }
+
+        do {
+            // Load the file data
+            //let data = try Data(contentsOf: url)
+            print("Step 1")
+            print("Configuration Detail")
+            print(String(data: data, encoding: .utf8) ?? "")
+            
+            
+            RequestManager.shared.loadConfiguration(from: data)
+
+        } catch {
+            print("Error decoding JSON: \(error)")
+            return
+        }
     }
+
     public static func getConfigList() -> String {
         var string = ""
         let vendors = RequestManager.shared.configuration?.vendors ?? []
-        
+
         for vendor in vendors {
             string.append("Name: \(vendor.vendorName ?? "")\n")
             string.append("Patterns: \(vendor.urlPatternMatches ?? [])\n\n")
@@ -131,36 +150,89 @@ public class MonitaSDK: NSObject {
         }
         return string
     }
+
     public static func getInterceptedRequestList() -> String {
         var string = ""
-        
+
         let lists = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
-        
-        for list in lists where list["filtered"] as! Bool == true {
-            string.append("\(list)\n")
+
+        for list in lists where list["filtered"] as? Bool ?? false {
+            var requestToSend = list
+            let name = requestToSend["name"] as? String ?? ""
+            requestToSend.removeValue(forKey: "vendor")
+            requestToSend.removeValue(forKey: "name")
+            requestToSend.removeValue(forKey: "filtered")
+            string.append("Vendor:\(name)\n")
+            string.append("\(requestToSend)\n")
             string.append("---------------------------------------------\n\n")
         }
         return string
     }
+
     public static func getInterceptedRequestListAll() -> String {
         var string = ""
-        let lists = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
-        
+        var lists = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
+
         for list in lists {
-            string.append("\(list)\n")
+            var requestToSend = list
+            let name = requestToSend["name"] as? String ?? ""
+            requestToSend.removeValue(forKey: "vendor")
+            requestToSend.removeValue(forKey: "name")
+            requestToSend.removeValue(forKey: "filtered")
+            string.append("Vendor:\(name)\n")
+            string.append("\(requestToSend)\n")
             string.append("---------------------------------------------\n\n")
         }
         return string
     }
-    let jsonFIle = """
+}
+extension MonitaSDK {
+    
+    @discardableResult
+    func initialize(
+        tp_id: String,
+        environment: String,
+        sourceAlias: String,
+        debug: Bool,
+        endpoint: String,
+        configEndpoint: String) -> MonitaInstance?
+    {
+        if mainInstance != nil {
+            MonitaSDK.logger.debug(message: MonitaMessage.message("Monita already initialized. Action ignored"))
+            return mainInstance
+        }
+
+        if debug {
+            MonitaSDK.logger.enableLogging()
+        }
+        
+        let config = MonitaConfig(
+            tp_id: tp_id,
+            environment: environment,
+            debug: debug,
+            endpoint: endpoint,
+            configEndpoint: configEndpoint
+        )
+
+        // Start
+        if let instance = MonitaInstance(config: config) {
+            mainInstance = instance
+            mainInstance?.start()
+            MonitaSDK.logger.debug(message: MonitaMessage.message("Monita v\(MonitaSDK.sdkVersion) started"))
+        } else {
+            MonitaSDK.logger.debug(message: MonitaMessage.message("Monita start failed"))
+        }
+        
+        return mainInstance
+    }
+}
+let jsonFIle = """
 {
   "monitoringVersion": "23",
   "vendors": [
     {
-      "vendorName": "Google Analytics",
+      "vendorName": "Google Firebase",
       "urlPatternMatches": [
-        "https://www.google-analytics.com/g/collect",
-        "firebase-settings.crashlytics",
         "fcm.googleapis.com",
         "firebase.com",
         "firebase.google.com",
@@ -176,46 +248,70 @@ public class MonitaSDK: NSObject {
         "firebaselogging-pa.googleapis.com",
         "firebaselogging.googleapis.com",
         "firebaseperusertopics-pa.googleapis.com",
-        "firebaseremoteconfig.googleapis.com"
+        "firebaseremoteconfig.googleapis.com",
+        "app-analytics-services",
       ],
-      "eventParamter": "cv",
-      "execludeParameters": [],
-      "filters": []
+      "eventParamter": "commerce.items[0].itemNumber",
+      "execludeParameters": [
+        "quantity"
+      ],
+      "filters": [
+        {
+          "key": "itemNumber",
+          "op": "eq",
+          "val": [
+            "ABC123"
+          ]
+        },
+        {
+          "key": "quantity",
+          "op": "ne",
+          "val": [
+            "2.0"
+          ]
+        },
+        {
+          "key": "itemName",
+          "op": "ne",
+          "val": [
+            "Adidas"
+          ]
+        }
+      ],
+      "filtersJoinOperator": "OR"
     },
     {
       "vendorName": "Facebook (Meta Pixel)",
       "urlPatternMatches": [
-        "facebook.com/tr/"
+        "facebook",
+        "graph.facebook"
       ],
-      "eventParamter": "ev",
+      "eventParamter": "event-ev1",
       "execludeParameters": [],
-      "filters": [
-        {
-          "key": "dl",
-          "op": "eq",
-          "val": [
-            "stuff"
-          ]
-        }
-      ]
+      "filters": []
     },
     {
-      "vendorName": "Monita",
+      "vendorName": "Google AdWords",
       "urlPatternMatches": [
-        "https://us-central1-tag-monitoring-dev.cloudfunctions.net/monalytics"
+        "app-analytics",
+        "googleadservices.com",
+        "googleads.g.doubleclick.net",
+        "pagead2.googleadservices"
       ],
-      "eventParamter": "{{gtm}}-{{gdid}}-{{regex::(?<=https:\\/\\/)[\\w|-]*::url}}-1",
+      "eventParamter": "label",
       "execludeParameters": [],
-      "filters": [
-        {
-          "key": "type",
-          "op": "blank"
-        }
-      ]
+      "filters": []
+    },
+    {
+      "vendorName": "Adobe Analytics",
+      "urlPatternMatches": [
+        "assets.adobedtm"
+      ],
+      "eventParamter": "events",
+      "execludeParameters": [],
+      "filters": []
     }
-  ],
-  "allowManualMonitoring": true
-}
-"""
+  ]
 }
 
+"""

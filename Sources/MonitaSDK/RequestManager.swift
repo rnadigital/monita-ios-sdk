@@ -2,7 +2,7 @@
 //  RequestManager.swift
 //  AppGlobalDemo
 //
-//  Created by Anis Mansuri on 10/09/24.
+//  Created by Coderon 10/09/24.
 //
 
 import Foundation
@@ -13,7 +13,7 @@ class RequestManager {
     var configuration: MonitoringResponse?
 
     private init() {}
-
+    @discardableResult
     func loadConfiguration(from jsonData: Data) -> MonitoringResponse? {
         configuration = parseConfiguration(from: jsonData)
         return configuration
@@ -36,18 +36,15 @@ class RequestManager {
         let urlString = url.absoluteString
         
         for vendor in config.vendors ?? [] {
-            for pattern in vendor.urlPatternMatches ?? [] {
-                if urlString.contains(pattern) {
-                    return (true, vendor)
-                }
+            let urlPatternMatches = vendor.urlPatternMatches ?? []
+            for pattern in urlPatternMatches where urlString.contains(pattern) {
+                return (true, vendor)
             }
         }
-        
         return (false, nil)
     }
 
-    func sendToServer(requestDetails: [String: Any], vender: Vendor) {
-
+    func sendToServer(requestDetail: [String: Any], vender: Vendor) {
         // Define the URL
         guard let url = URL(string: "https://dev-stream.getmonita.io/api/v1/") else {
             print("Invalid URL")
@@ -59,19 +56,20 @@ class RequestManager {
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let venderName = vender.vendorName ?? ""
+        let venderName = vender.vendorName
         let bundle = Bundle.main
            
            // Retrieve the version number
-        //let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
         let timestamp = Date().timeIntervalSince1970.description
        
-        //let deviceModel = UIDevice.current.model
+        let deviceModel = UIDevice.current.model
         let systemVersion = UIDevice.current.systemVersion
-        let urlToSend = requestDetails["url"] as? String ?? ""
-        let methodToSendt = requestDetails["method"] as? String ?? ""
-        var requestToSend = requestDetails
+        let urlToSend = requestDetail["url"] as? String ?? ""
+        let methodToSendt = requestDetail["method"] as? String ?? ""
+        var requestToSend = requestDetail
         requestToSend.removeValue(forKey: "vendor")
+        requestToSend.removeValue(forKey: "name")
         requestToSend.removeValue(forKey: "filtered")
 
         //mv: SDK Version
@@ -88,7 +86,7 @@ class RequestManager {
         var event = ""
         do {
             // Convert array to JSON data
-            let jsonData = try JSONSerialization.data(withJSONObject: [requestDetails], options: .prettyPrinted)
+            let jsonData = try JSONSerialization.data(withJSONObject: requestDetail, options: .prettyPrinted)
 
             // Convert JSON data to a string (for display or logging)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -101,22 +99,38 @@ class RequestManager {
         } catch {
             print("Error converting array to JSON: \(error.localizedDescription)")
         }
+        if let body = requestDetail["body"] as? String, let execludeParameters = vender.execludeParameters {
+            var bodyDic = body.dictionary()
+            //remove excluded parameters from dt
+            for excludeParameter in execludeParameters {
+                bodyDic.forEach {
+                    if ($0.value as? String ?? "") == excludeParameter {
+                        bodyDic.removeValue(forKey: $0.key)
+                    }
+                }
+            }
+            requestToSend["body"] = bodyDic.jsonString
+        }
+        if !validateFilters(dtData: [requestToSend], filters: vender.filters ?? []) {
+            
+            return
+        }
         
         // Define the JSON payload
         let payload: [String: Any] = [
-            "t": "fe041147-0600-48ad-a04e-d3265becc4eb",
+            "t": MonitaSDK.shared.token,
             "dm": "app",
             "mv": frameworkVersion,
             "sv": systemVersion,
             "tm": timestamp,
             "e": event,
-            "vn": venderName,
+            "vn": venderName ?? "",
             "st": "success",
             "m": methodToSendt,
             "vu": urlToSend,
             "u": bundleIdentifier,
             "p": "",
-            "dt": [requestDetails],
+            "dt": [requestToSend],
             "s": "ios-sdk",
             "rl": frameworkVersion,
             "env": "production",
@@ -127,9 +141,9 @@ class RequestManager {
             "cid": "",
             "ev": ""
         ]
-        print("Step 4")
+        print("\nStep 4")
         print("Request Sending to server")
-        print(payload)
+        //print(payload)
 
         // Convert the payload to JSON data
         do {
@@ -153,7 +167,7 @@ class RequestManager {
                 print("Invalid response or data")
                 return
             }
-            print("Step 5")
+            print("\nStep 5")
             print("HttpResponse StatusCode")
             print(httpResponse.statusCode)
             
@@ -167,6 +181,76 @@ class RequestManager {
         // Start the data task
         task.resume()
 
+    }
+    
+
+    func evaluateCondition(value: String?, op: String, values: [String]) -> Bool {
+        
+        switch op {
+        case "eq":
+            return values.contains(value ?? "")
+        case "ne":
+            return !values.contains(value ?? "")
+        case "contains":
+            return values.contains { (value ?? "").contains($0) }
+        case "blank":
+            return (value ?? "").isEmpty
+        case "not_blank":
+            return !(value ?? "").isEmpty
+        case "exist":
+            return value != nil
+        case "not_exist":
+            return value == nil
+        default:
+            return false
+        }
+    }
+    
+    func validateFilters(dtData: [[String: Any]], filters: [Filter]) -> Bool {
+        
+        for filter in filters {
+            
+            let key = filter.finalKey
+            let op = filter.finalOp
+            let values = filter.finalVal
+            
+            //print("Intercepted validateFilters started")
+            
+            var filterMatchFound = false
+            
+            for data in dtData {
+                let value = findValueByKey(data: data, key: key) as? String
+                //print("Intercepted FilterValidator key \(key) value \(String(describing: value))")
+                
+                if value == nil {
+                    if op == "exist" {
+                        //print("Intercepted FilterValidator exist Key must exist")
+                        return false // Key must exist
+                    } else if op == "not_exist" {
+                        filterMatchFound = true
+                        //print("FilterValidator not_exist Key should not exist")
+                        break // Key should not exist; condition is true for this item
+                    }
+                } else {
+                    
+                    if evaluateCondition(value: value, op: op, values: values) {
+                        filterMatchFound = true
+                        break // Filter condition met for this item
+                    }
+                }
+            }
+            
+            if !filterMatchFound {
+                return false
+            }
+        }
+        return true // All filters passed
+    }
+
+    func findValueByKey(data: [String: Any?], key: String) -> Any? {
+        // Recursive search implementation goes here
+        // For now, assuming direct key lookup
+        return data[key]
     }
     
 }
