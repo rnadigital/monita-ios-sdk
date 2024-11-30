@@ -111,8 +111,7 @@ class RequestManager {
             }
             requestToSend["body"] = bodyDic.jsonString
         }
-        if !validateFilters(dtData: [requestToSend], filters: vender.filters ?? []) {
-            
+        if !checkPassOnFilters(data: requestToSend, vendor: vender) {
             return
         }
         
@@ -184,74 +183,105 @@ class RequestManager {
     }
     
 
-    func evaluateCondition(value: String?, op: String, values: [String]) -> Bool {
-        
-        switch op {
-        case "eq":
-            return values.contains(value ?? "")
-        case "ne":
-            return !values.contains(value ?? "")
-        case "contains":
-            return values.contains { (value ?? "").contains($0) }
-        case "blank":
-            return (value ?? "").isEmpty
-        case "not_blank":
-            return !(value ?? "").isEmpty
-        case "exist":
-            return value != nil
-        case "not_exist":
-            return value == nil
-        default:
-            return false
-        }
-    }
-    
-    func validateFilters(dtData: [[String: Any]], filters: [Filter]) -> Bool {
+
+    func checkPassOnFilters(data: [String: Any], vendor: Vendor) -> Bool {
+        let joinOperator = vendor.filtersJoinOperator ?? ""
+        let filters = vendor.filters ?? []
+        let exitImmediately = (joinOperator == "AND")
+        var results: [Bool] = []
         
         for filter in filters {
-            
             let key = filter.finalKey
             let op = filter.finalOp
-            let values = filter.finalVal
+            let filterValues = filter.finalVal
+            var pass = true
             
-            //print("Intercepted validateFilters started")
-            
-            var filterMatchFound = false
-            
-            for data in dtData {
-                let value = findValueByKey(data: data, key: key) as? String
-                //print("Intercepted FilterValidator key \(key) value \(String(describing: value))")
-                
-                if value == nil {
-                    if op == "exist" {
-                        //print("Intercepted FilterValidator exist Key must exist")
-                        return false // Key must exist
-                    } else if op == "not_exist" {
-                        filterMatchFound = true
-                        //print("FilterValidator not_exist Key should not exist")
-                        break // Key should not exist; condition is true for this item
+            if ["eq", "contains"].contains(op) {
+                let checkFn: (Any, String) -> Bool = (op == "eq") ?
+                    { val, filterVal in "\(val)" == "\(filterVal)" } :
+                    { val, filterVal in
+                        guard let valString = val as? String else { return false }
+                        return valString.contains(filterVal)
                     }
-                } else {
+                
+                let val = fillParamsFromData(key: key, data: data)
+                
+                pass = false
+                for filterValue in filterValues {
                     
-                    if evaluateCondition(value: value, op: op, values: values) {
-                        filterMatchFound = true
-                        break // Filter condition met for this item
+                    if checkFn(val, filterValue) {
+                        pass = true
+                        break
+                    }
+                }
+                if !pass && exitImmediately {
+                    return false
+                }
+            } else if op == "ne" {
+                for filterValue in filterValues {
+                    let compareVal = fillParamsFromData(key: key, data: data) as? String ?? ""
+                    if compareVal == filterValue {
+                        if exitImmediately {
+                            return false
+                        } else {
+                            pass = false
+                            break
+                        }
+                    }
+                }
+            } else if op == "blank" {
+                let value = fillParamsFromData(key: key, data: data)
+                if let valueString = value as? String, !valueString.isEmpty {
+                    if exitImmediately {
+                        return false
+                    } else {
+                        pass = false
+                    }
+                }
+            } else if op == "not_blank" {
+                let value = fillParamsFromData(key: key, data: data)
+                if value == nil || (value as? String)?.isEmpty == true {
+                    if exitImmediately {
+                        return false
+                    } else {
+                        pass = false
+                    }
+                }
+            } else if op == "exist" {
+                let value = fillParamsFromData(key: key, data: data)
+                if value == nil {
+                    if exitImmediately {
+                        return false
+                    } else {
+                        pass = false
+                    }
+                }
+            } else if op == "not_exist" {
+                let value = fillParamsFromData(key: key, data: data)
+                if value != nil {
+                    if exitImmediately {
+                        return false
+                    } else {
+                        pass = false
                     }
                 }
             }
             
-            if !filterMatchFound {
-                return false
-            }
+            results.append(pass)
         }
-        return true // All filters passed
+        
+        if exitImmediately {
+            return true
+        } else {
+            return filters.isEmpty || results.contains(true)
+        }
     }
 
-    func findValueByKey(data: [String: Any?], key: String) -> Any? {
-        // Recursive search implementation goes here
-        // For now, assuming direct key lookup
+    // Helper function to extract value from the data dictionary.
+    func fillParamsFromData(key: String, data: [String: Any]) -> Any? {
         return data[key]
     }
+
     
 }
 /*

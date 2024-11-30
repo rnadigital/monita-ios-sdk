@@ -22,6 +22,19 @@ struct Vendor: Codable {
     let execludeParameters: [String]?
     let filters: [Filter]?
     let filtersJoinOperator: String?
+    var isFiltersJoinOperatorAvailable: Bool {
+        if let filtersJoinOperator = filtersJoinOperator {
+            return true
+        }
+        return false
+    }
+    var isValueANY: Bool {
+        return (filtersJoinOperator ?? "").lowercased() == "any"
+    }
+    var isValueOR: Bool {
+        return (filtersJoinOperator ?? "").lowercased() == "or"
+    }
+    
 }
 
 // MARK: - Filter Model
