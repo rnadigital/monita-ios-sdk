@@ -34,6 +34,17 @@ struct Vendor: Codable {
     var isValueOR: Bool {
         return (filtersJoinOperator ?? "").lowercased() == "or"
     }
+    static func parseVendor(from dic: Parameter) -> Vendor? {
+        do {
+            guard let jsonData = dic.jsonString.data(using: .utf8) else { return nil }
+            let decoder = JSONDecoder()
+            return try decoder.decode(Vendor.self, from: jsonData)
+
+        } catch {
+            
+        }
+        return nil
+    }
     
 }
 

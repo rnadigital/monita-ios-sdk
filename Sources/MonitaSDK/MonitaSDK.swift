@@ -29,14 +29,18 @@ public class MonitaSDK: NSObject {
     private static let lastFetchDateKey = "LastFetchDate"
     var token: String = ""
     var fetchLocally = false
+    var batchSize: Int = 5
+    var cid: String = ""
     // Call this method in AppDelegate's didFinishLaunchingWithOptions
-    public static func configure(fetchLocally: Bool = false) {
+    public static func configure(fetchLocally: Bool = false, enableLogger: Bool, batchSize: Int, cid: String, appVersion: String) {
         MonitaSDK.shared.fetchLocally = fetchLocally
         guard let token = Bundle.main.infoDictionary?["MonitaSDKToken"] as? String else {
             UIApplication.showAlert(message: "Token not available in plist file")
             return
         }
         MonitaSDK.shared.token = token
+        MonitaSDK.shared.batchSize = batchSize
+        MonitaSDK.shared.cid = cid
         // Register the URL Protocol
         UserDefaults.standard.setVal(value: [], key: .requestListCall)
         UserDefaults.standard.setVal(value: [], key: .requestList)
@@ -45,7 +49,7 @@ public class MonitaSDK: NSObject {
             tp_id: token,
             environment: "UAT",
             sourceAlias: "ios",
-            debug: false,
+            debug: enableLogger,
             endpoint: "https://dev-stream.getmonita.io/api/v1/",
             configEndpoint: "https://dev-stream.getmonita.io/api/v1/"
         )
@@ -84,28 +88,26 @@ public class MonitaSDK: NSObject {
     private func fetchConfiguration() {
         task.dataTask(with: configURL) { data, _, error in
             if let error = error {
-                print("Failed to fetch configuration: \(error)")
+                MonitaSDK.logger.debug(message: MonitaMessage.message("Loading from local"))
                 self.fetchConfigurationLocally()
                 return
             }
 
             guard let data = data else {
-                print("No data received")
+                MonitaSDK.logger.debug(message: MonitaMessage.message("Loading from local"))
                 self.fetchConfigurationLocally()
                 return
             }
 
             let config = RequestManager.shared.loadConfiguration(from: data)
             if config == nil {
-                print("Step 1")
-                print("Config loading failed from monita server")
+                MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 1:\nConfig loading failed from monita server"))
                 self.fetchConfigurationLocally()
             } else {
-                print("Step 1")
-                print("Config file loaded from monita server")
+                MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 1:\nConfig file loaded from monita server"))
             }
             if self.fetchLocally {
-                print("Loading from local")
+                MonitaSDK.logger.debug(message: MonitaMessage.message("Loading from local"))
                 self.fetchConfigurationLocally()
             }
             
@@ -119,24 +121,10 @@ public class MonitaSDK: NSObject {
 //        }
         
         guard let data = jsonFIle.data(using: .utf8) else {
-            print("Failed to find AppGlobalConfig.json in bundle.")
             return
         }
-
-        do {
-            // Load the file data
-            //let data = try Data(contentsOf: url)
-            print("Step 1")
-            print("Configuration Detail")
-            print(String(data: data, encoding: .utf8) ?? "")
-            
-            
-            RequestManager.shared.loadConfiguration(from: data)
-
-        } catch {
-            print("Error decoding JSON: \(error)")
-            return
-        }
+        MonitaSDK.logger.debug(message: MonitaMessage.message("Step 1:\nConfiguration Detail"))
+        RequestManager.shared.loadConfiguration(from: data)
     }
 
     public static func getConfigList() -> String {
@@ -154,7 +142,7 @@ public class MonitaSDK: NSObject {
     public static func getInterceptedRequestList() -> String {
         var string = ""
 
-        let lists = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
+        let lists = UserDefaults.standard.getVal(key: .requestList) as? [Parameter] ?? []
 
         for list in lists where list["filtered"] as? Bool ?? false {
             var requestToSend = list
@@ -171,7 +159,7 @@ public class MonitaSDK: NSObject {
 
     public static func getInterceptedRequestListAll() -> String {
         var string = ""
-        var lists = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
+        var lists = UserDefaults.standard.getVal(key: .requestList) as? [Parameter] ?? []
 
         for list in lists {
             var requestToSend = list
@@ -198,7 +186,6 @@ extension MonitaSDK {
         configEndpoint: String) -> MonitaInstance?
     {
         if mainInstance != nil {
-            MonitaSDK.logger.debug(message: MonitaMessage.message("Monita already initialized. Action ignored"))
             return mainInstance
         }
 

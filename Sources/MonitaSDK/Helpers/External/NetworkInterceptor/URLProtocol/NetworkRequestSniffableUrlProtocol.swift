@@ -26,14 +26,12 @@ class NetworkRequestSniffableUrlProtocol: URLProtocol {
             return false
         }
         let url = request.url!
-        print("\nStep 2")
-        print("Intercepted URL")
-        print(url.absoluteString)
+        MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 2:\nIntercepted URL\n\(url.absoluteString)"))
         
         // Example: Send intercepted request details to a server
         let req = RequestManager.shared.shouldSendRequest(url: url)
         var requestDetails: [String : Any] = [
-            "name": req.vender?.vendorName ?? "",
+            "name": req.vendor?.vendorName ?? "",
             "url": request.url!.absoluteString,
             "method": request.httpMethod ?? "GET",
             "headers": request.allHTTPHeaderFields ?? [:],
@@ -41,11 +39,9 @@ class NetworkRequestSniffableUrlProtocol: URLProtocol {
             "filtered": req.filtered
         ]
         
-        var list = UserDefaults.standard.getVal(key: .requestList) as? [[String: Any]] ?? []
+        var list = UserDefaults.standard.getVal(key: .requestList) as? [Parameter] ?? []
         
         if req.filtered {
-            print("\nStep 3")
-            print("URL matches with Vendor pattern")
             
             let alternateRequest = URLRequestFactory().createURLRequest(originalUrlRequest: request)
             let cusBody = alternateRequest.getHttpBodyString()
@@ -55,11 +51,12 @@ class NetworkRequestSniffableUrlProtocol: URLProtocol {
             if !val.isEmpty {
                 
             }
-//            print("v", v)
-            print(requestDetails)
+            MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3:\nURL matches with Vendor pattern\n\(requestDetails)"))
 
             // Send to your server
-            RequestManager.shared.sendToServer(requestDetail: requestDetails, vender: req.vender!)
+            RequestManager.shared.addToBatch(requestDetail: requestDetails, vendor: req.vendor!)
+            
+            
         }
         list.append(requestDetails)
         UserDefaults.standard.setVal(value: list, key: .requestList)

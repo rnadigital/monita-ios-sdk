@@ -48,48 +48,34 @@ extension Array {
 }
 
 extension String {
-    func dictionary() -> [String: Any] {
-        var returnValue = [String: Any]()
+    func dictionary() -> Parameter {
+        var returnValue = Parameter()
         if isEmpty {
             return returnValue
         }
         if let jsonData = data(using: .utf8) {
             do {
                 // Deserialize the Data into a dictionary
-                if let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
+                if let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? Parameter {
                     
                     returnValue = dictionary
                 } else {
-                    print("Failed to convert JSON string to dictionary.")
+                    MonitaSDK.logger.debug(message: MonitaMessage.message("Failed to convert JSON string to dictionary."))
                 }
             } catch {
-                print("Error deserializing JSON: \(error)-\(self)")
             }
         } else {
-            print("Failed to convert string to data.")
+            MonitaSDK.logger.debug(message: MonitaMessage.message("Failed to convert string to data."))
         }
         return returnValue
     }
-    func array() -> [[String: Any]] {
+    func array() -> [Parameter] {
         guard let data = data(using: .utf8, allowLossyConversion: false) else { return [] }
-        let value = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String: Any]]
+        let value = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [Parameter]
         return value ?? []
     }
 }
-extension UserDefaults {
-    enum Keys: String {
-        case requestListCall = "RequestListCall"
-        case requestList = "RequestList"
-    }
 
-    func setVal(value: Any, key: Keys) {
-        setValue(value, forKey: key.rawValue)
-    }
-
-    func getVal(key: Keys) -> Any? {
-        return value(forKey: key.rawValue)
-    }
-}
 
 extension Bundle {
     public var appName: String           { getInfo("CFBundleName")  }

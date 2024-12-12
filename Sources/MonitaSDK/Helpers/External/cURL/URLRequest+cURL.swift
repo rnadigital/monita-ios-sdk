@@ -137,7 +137,6 @@ extension URLRequest {
                 let gzipedString = String(data: gziped, encoding: .utf8)
                 if gzipedString != nil {
 //                    print("gzipedString", url?.absoluteString)
-//                    print(gzipedString)
                 }
                 
                 if gzipedString?.isEmpty ?? true || gzipedString == nil {
@@ -169,13 +168,9 @@ extension URLRequest {
         return value.replacingOccurrences(of: "'", with: "'\\''")
     }
     
-    fileprivate func convertToJsonObject(text: String) -> [String: Any]? {
+    fileprivate func convertToJsonObject(text: String) -> Parameter? {
         if let data = text.data(using: .utf8) {
-            do {
-                return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            } catch {
-                // print(error.localizedDescription)
-            }
+            return try! JSONSerialization.jsonObject(with: data, options: []) as? Parameter
         }
         return nil
     }

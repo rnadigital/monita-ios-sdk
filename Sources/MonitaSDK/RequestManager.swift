@@ -24,13 +24,12 @@ class RequestManager {
             return try decoder.decode(MonitoringResponse.self, from: jsonData)
 
         } catch {
-            print(error)
             UIApplication.showAlert(title: "Configuration Parsing Error, Loading local",message: error.localizedDescription)
         }
         return nil
     }
 
-    func shouldSendRequest(url: URL) -> (filtered: Bool, vender: Vendor?) {
+    func shouldSendRequest(url: URL) -> (filtered: Bool, vendor: Vendor?) {
         guard let config = configuration else { return (false, nil) }
         
         let urlString = url.absoluteString
@@ -43,119 +42,27 @@ class RequestManager {
         }
         return (false, nil)
     }
-
-    func sendToServer(requestDetail: [String: Any], vender: Vendor) {
-        // Define the URL
-        guard let url = URL(string: "https://dev-stream.getmonita.io/api/v1/") else {
-            print("Invalid URL")
-            return
-        }
-
+   
+    func sendToServer(payload: Parameter, completion: @escaping (Bool) -> Void) {
+       
         // Create the URLRequest object
+        // Define the URL
+        let url = URL(string: "https://dev-stream.getmonita.io/api/v1/")!
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 4:\nRequest Sending to server\n\(payload)"))
         
-        let venderName = vender.vendorName
-        let bundle = Bundle.main
-           
-           // Retrieve the version number
-        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
-        let timestamp = Date().timeIntervalSince1970.description
-       
-        let deviceModel = UIDevice.current.model
-        let systemVersion = UIDevice.current.systemVersion
-        let urlToSend = requestDetail["url"] as? String ?? ""
-        let methodToSendt = requestDetail["method"] as? String ?? ""
-        var requestToSend = requestDetail
-        requestToSend.removeValue(forKey: "vendor")
-        requestToSend.removeValue(forKey: "name")
-        requestToSend.removeValue(forKey: "filtered")
-
-        //mv: SDK Version
-        var frameworkVersion = "1.0"
-        if let frameworkBundle = Bundle(identifier: Constant.bundle),
-           let infoDictionary = frameworkBundle.infoDictionary {
-            frameworkVersion = infoDictionary["CFBundleShortVersionString"] as? String ?? ""
-        }
-        let mainBundle = Bundle.main
-           
-           // Retrieve the bundle identifier from the host app's bundle
-        let bundleIdentifier = mainBundle.bundleIdentifier ?? ""
-        var dtValues = ""
-        var event = ""
-        do {
-            // Convert array to JSON data
-            let jsonData = try JSONSerialization.data(withJSONObject: requestDetail, options: .prettyPrinted)
-
-            // Convert JSON data to a string (for display or logging)
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print(jsonString)
-                dtValues = jsonString
-                if dtValues.contains(vender.eventParamter ?? "") {
-                    event = vender.eventParamter ?? ""
-                }
-            }
-        } catch {
-            print("Error converting array to JSON: \(error.localizedDescription)")
-        }
-        if let body = requestDetail["body"] as? String, let execludeParameters = vender.execludeParameters {
-            var bodyDic = body.dictionary()
-            //remove excluded parameters from dt
-            for excludeParameter in execludeParameters {
-                bodyDic.forEach {
-                    if ($0.value as? String ?? "") == excludeParameter {
-                        bodyDic.removeValue(forKey: $0.key)
-                    }
-                }
-            }
-            requestToSend["body"] = bodyDic.jsonString
-        }
-        if !checkPassOnFilters(data: requestToSend, vendor: vender) {
-            return
-        }
-        
-        // Define the JSON payload
-        let payload: [String: Any] = [
-            "t": MonitaSDK.shared.token,
-            "dm": "app",
-            "mv": frameworkVersion,
-            "sv": systemVersion,
-            "tm": timestamp,
-            "e": event,
-            "vn": venderName ?? "",
-            "st": "success",
-            "m": methodToSendt,
-            "vu": urlToSend,
-            "u": bundleIdentifier,
-            "p": "",
-            "dt": [requestToSend],
-            "s": "ios-sdk",
-            "rl": frameworkVersion,
-            "env": "production",
-            "et": "1",
-            "vid": "1",
-            "cn": "",
-            "sid": "",
-            "cid": "",
-            "ev": ""
-        ]
-        print("\nStep 4")
-        print("Request Sending to server")
-        //print(payload)
-
         // Convert the payload to JSON data
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: payload, options: [])
-        } catch {
-            print("Error serializing JSON: \(error)")
-            return
-        }
+        request.httpBody = try! JSONSerialization.data(withJSONObject: payload, options: [])
 
         // Create a URLSession data task
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                print("Error: \(error)")
+                MonitaSDK.logger.debug(message: MonitaMessage.message("Error: \(error)"))
+                completion(true)
                 return
             }
 
@@ -163,17 +70,13 @@ class RequestManager {
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode),
                   let data = data else {
-                print("Invalid response or data")
                 return
             }
-            print("\nStep 5")
-            print("HttpResponse StatusCode")
-            print(httpResponse.statusCode)
             
-
+            MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 5:\nHttpResponse StatusCode\n\(httpResponse.statusCode)"))
+            completion(true)
             // Handle the response data
             if let responseString = String(data: data, encoding: .utf8) {
-                print("Response data:\n\(responseString)")
             }
         }
 
@@ -184,7 +87,7 @@ class RequestManager {
     
 
 
-    func checkPassOnFilters(data: [String: Any], vendor: Vendor) -> Bool {
+    func checkPassOnFilters(data: Parameter, vendor: Vendor) -> Bool {
         let joinOperator = vendor.filtersJoinOperator ?? ""
         let filters = vendor.filters ?? []
         let exitImmediately = (joinOperator == "AND")
@@ -278,11 +181,131 @@ class RequestManager {
     }
 
     // Helper function to extract value from the data dictionary.
-    func fillParamsFromData(key: String, data: [String: Any]) -> Any? {
+    func fillParamsFromData(key: String, data: Parameter) -> Any? {
         return data[key]
     }
 
     
+}
+
+extension RequestManager {
+    var pendingServerReqests: [Parameter] {
+        get {
+            return UserDefaults.standard.getVal(key: .pendingServerReqests) as? [Parameter] ?? []
+        }
+        set {
+            UserDefaults.standard.setVal(value: newValue, key: .pendingServerReqests)
+        }
+    }
+    
+    func savePendingServerReqest(request: Parameter) {
+        var reqs = pendingServerReqests
+        reqs.append(request)
+        UserDefaults.standard.setVal(value: reqs, key: .pendingServerReqests)
+        if reqs.count >= MonitaSDK.shared.batchSize {
+            uploadRequestsSequentially()
+        }
+    }
+    func addToBatch(requestDetail: Parameter, vendor: Vendor) {
+        let vendorName = vendor.vendorName
+        let bundle = Bundle.main
+           
+           // Retrieve the version number
+        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        let timestamp = Date().timeIntervalSince1970.description
+       
+        let deviceModel = UIDevice.current.model
+        let systemVersion = UIDevice.current.systemVersion
+        let urlToSend = requestDetail["url"] as? String ?? ""
+        let methodToSendt = requestDetail["method"] as? String ?? ""
+        var requestToSend = requestDetail
+        requestToSend.removeValue(forKey: "vendor")
+        requestToSend.removeValue(forKey: "name")
+        requestToSend.removeValue(forKey: "filtered")
+        requestToSend.removeValue(forKey: "method")
+        //mv: SDK Version
+        var frameworkVersion = "1.0"
+        if let frameworkBundle = Bundle(identifier: Constant.bundle),
+           let infoDictionary = frameworkBundle.infoDictionary {
+            frameworkVersion = infoDictionary["CFBundleShortVersionString"] as? String ?? ""
+        }
+        let mainBundle = Bundle.main
+           
+           // Retrieve the bundle identifier from the host app's bundle
+        let bundleIdentifier = mainBundle.bundleIdentifier ?? ""
+        var dtValues = ""
+        var event = ""
+        do {
+            // Convert array to JSON data
+            let jsonData = try JSONSerialization.data(withJSONObject: requestDetail, options: .prettyPrinted)
+
+            // Convert JSON data to a string (for display or logging)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                dtValues = jsonString
+                if dtValues.contains(vendor.eventParamter ?? "") {
+                    event = vendor.eventParamter ?? ""
+                }
+            }
+        } catch {
+            
+        }
+        if let body = requestDetail["body"] as? String, let execludeParameters = vendor.execludeParameters {
+            var bodyDic = body.dictionary()
+            //remove excluded parameters from dt
+            for excludeParameter in execludeParameters {
+                bodyDic.forEach {
+                    if ($0.value as? String ?? "") == excludeParameter {
+                        bodyDic.removeValue(forKey: $0.key)
+                    }
+                }
+            }
+            requestToSend["body"] = bodyDic.jsonString
+        }
+        if !checkPassOnFilters(data: requestToSend, vendor: vendor) {
+            return
+        }
+        
+        // Define the JSON payload
+        let payload: Parameter = [
+            "t": MonitaSDK.shared.token,
+            "dm": "app",
+            "mv": frameworkVersion,
+            "sv": systemVersion,
+            "tm": timestamp,
+            "e": event,
+            "vn": vendorName ?? "",
+            "st": "success",
+            "m": methodToSendt,
+            "vu": urlToSend,
+            "u": bundleIdentifier,
+            "p": "",
+            "dt": [requestToSend],
+            "s": "ios-sdk",
+            "rl": frameworkVersion,
+            "env": "production",
+            "et": "1",
+            "vid": "1",
+            "cn": "",
+            "sid": "",
+            "cid": MonitaSDK.shared.cid,
+            "ev": ""
+        ]
+        savePendingServerReqest(request: payload)
+    }
+    func uploadRequestsSequentially() {
+        var requests = pendingServerReqests
+        if requests.isEmpty { return }
+        let payload = requests[0]
+        sendToServer(payload: payload) { [weak self] status in
+            guard let strongSelf = self else { return }
+            if status {
+                requests.remove(at: 0)
+                strongSelf.pendingServerReqests = requests
+                strongSelf.uploadRequestsSequentially()
+            }
+        }
+
+    }
 }
 /*
 t: User-provided token
