@@ -100,19 +100,11 @@ class RequestManager {
             var pass = true
             
             if ["eq", "contains"].contains(op) {
-                let checkFn: (Any, String) -> Bool = (op == "eq") ?
-                    { val, filterVal in "\(val)" == "\(filterVal)" } :
-                    { val, filterVal in
-                        guard let valString = val as? String else { return false }
-                        return valString.contains(filterVal)
-                    }
-                
                 let val = fillParamsFromData(key: key, data: data)
                 
                 pass = false
                 for filterValue in filterValues {
-                    
-                    if checkFn(val, filterValue) {
+                    if filterValue == val as? String ?? "" {
                         pass = true
                         break
                     }
@@ -182,6 +174,13 @@ class RequestManager {
 
     // Helper function to extract value from the data dictionary.
     func fillParamsFromData(key: String, data: Parameter) -> Any? {
+        if let bodyDic = (data["body"] as? String)?.dictionary(), let array = (bodyDic["custom_events"] as? String)?.array() {
+            for element in array {
+                if let newVal = element[key] as? String {
+                    return newVal
+                }
+            }
+        }
         return data[key]
     }
 

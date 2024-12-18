@@ -15,7 +15,7 @@ public class AnyHttpRequestEvaluator: RequestEvaluator {
         guard let scheme = urlRequest.url?.scheme else {
             return false
         }
-        if ["https", "http"].contains(scheme) {
+        if ["https", "http", "wss", "ws"].contains(scheme) {
             return true
         }
         return false

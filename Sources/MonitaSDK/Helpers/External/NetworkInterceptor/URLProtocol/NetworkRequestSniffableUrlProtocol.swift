@@ -13,6 +13,15 @@ class NetworkRequestSniffableUrlProtocol: URLProtocol {
         if request.url!.absoluteString.contains("dev-stream.getmonita") {
             return false
         }
+        
+        if request.url!.absoluteString.contains("m.media-amazon.com") {
+            return false
+        }
+        if request.url!.absoluteString.contains("muzikercdn.com") {
+            return false
+        }
+        
+        
         if NetworkInterceptor.shared.isRequestRedirectable(urlRequest: request) {
             return false
         }
@@ -22,9 +31,9 @@ class NetworkRequestSniffableUrlProtocol: URLProtocol {
         if let httpHeaders = request.allHTTPHeaderFields, let refiredValue = httpHeaders["Refired"], refiredValue == "true" {
             return false
         }
-        if let _ = URLProtocol.property(forKey: "NetworkRequestSniffableUrlProtocol", in: request) {
-            return false
-        }
+//        if let _ = URLProtocol.property(forKey: "NetworkRequestSniffableUrlProtocol", in: request) {
+//            return false
+//        }
         let url = request.url!
         MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 2:\nIntercepted URL\n\(url.absoluteString)"))
         

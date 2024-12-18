@@ -30,6 +30,7 @@ public class MonitaSDK: NSObject {
     var token: String = ""
     var fetchLocally = false
     var batchSize: Int = 5
+    var enableLogger: Bool = false
     var cid: String = ""
     // Call this method in AppDelegate's didFinishLaunchingWithOptions
     public static func configure(fetchLocally: Bool = false, enableLogger: Bool, batchSize: Int, cid: String, appVersion: String) {
@@ -41,18 +42,12 @@ public class MonitaSDK: NSObject {
         MonitaSDK.shared.token = token
         MonitaSDK.shared.batchSize = batchSize
         MonitaSDK.shared.cid = cid
+        MonitaSDK.shared.enableLogger = enableLogger
         // Register the URL Protocol
         UserDefaults.standard.setVal(value: [], key: .requestListCall)
         UserDefaults.standard.setVal(value: [], key: .requestList)
         checkAndFetchConfiguration()
-        MonitaSDK.shared.initialize(
-            tp_id: token,
-            environment: "UAT",
-            sourceAlias: "ios",
-            debug: enableLogger,
-            endpoint: "https://dev-stream.getmonita.io/api/v1/",
-            configEndpoint: "https://dev-stream.getmonita.io/api/v1/"
-        )
+        
         
     }
 //    func configuration() -> MonitaConfig {
@@ -104,7 +99,8 @@ public class MonitaSDK: NSObject {
                 MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 1:\nConfig loading failed from monita server"))
                 self.fetchConfigurationLocally()
             } else {
-                MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 1:\nConfig file loaded from monita server"))
+                MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 1:\nConfig file loaded from monita server:\n\(String(data: data, encoding: .utf8)!)"))
+                MonitaSDK.shared.start()
             }
             if self.fetchLocally {
                 MonitaSDK.logger.debug(message: MonitaMessage.message("Loading from local"))
@@ -125,6 +121,8 @@ public class MonitaSDK: NSObject {
         }
         MonitaSDK.logger.debug(message: MonitaMessage.message("Step 1:\nConfiguration Detail"))
         RequestManager.shared.loadConfiguration(from: data)
+        MonitaSDK.shared.start()
+        
     }
 
     public static func getConfigList() -> String {
@@ -175,7 +173,16 @@ public class MonitaSDK: NSObject {
     }
 }
 extension MonitaSDK {
-    
+    func start() {
+        initialize(
+            tp_id: token,
+            environment: "UAT",
+            sourceAlias: "ios",
+            debug: enableLogger,
+            endpoint: "https://dev-stream.getmonita.io/api/v1/",
+            configEndpoint: "https://dev-stream.getmonita.io/api/v1/"
+        )
+    }
     @discardableResult
     func initialize(
         tp_id: String,
