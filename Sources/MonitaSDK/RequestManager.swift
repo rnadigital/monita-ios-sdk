@@ -163,11 +163,11 @@ class RequestManager {
             }
             
             results.append(pass)
-            MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.3:\nFilter Value matched: \(filterValues): \(pass)"))
+            MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.3:\n\(vendor.vendorName ?? "") - Filter Value matched: \(filterValues): \(pass)"))
         }
         
         if exitImmediately {
-            MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.3:\nFilter Value not matched"))
+            MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.3:\n\(vendor.vendorName ?? "") - Filter Value not matched"))
             return true
         } else {
             return filters.isEmpty || results.contains(true)
@@ -245,9 +245,9 @@ extension RequestManager {
                 dtValues = jsonString
                 if dtValues.contains(vendor.eventParamter ?? "") {
                     event = vendor.eventParamter ?? ""
-                    MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.1:\nEvent Parameter available in request"))
+                    MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.1:\n\(vendor.vendorName ?? "") - Event Parameter available in request"))
                 } else {
-                    MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.1:\nEvent Parameter not available in request"))
+                    MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.1:\n\(vendor.vendorName ?? "") - Event Parameter not available in request"))
                 }
             }
         } catch {
@@ -260,9 +260,9 @@ extension RequestManager {
                 bodyDic.forEach {
                     if ($0.value as? String ?? "") == excludeParameter {
                         bodyDic.removeValue(forKey: $0.key)
-                        MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.2:\nParameter excluded from request"))
+                        MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.2:\n\(vendor.vendorName ?? "") - Parameter excluded from request"))
                     } else {
-                        MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.2:\nParameter not excluded from request"))
+                        MonitaSDK.logger.debug(message: MonitaMessage.message("\nStep 3.2:\n\(vendor.vendorName ?? "") - Parameter not excluded from request"))
                     }
                 }
             }
