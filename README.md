@@ -40,6 +40,32 @@ This will automatically update your project.pbxproj file to include the framewor
 
 
 ## Installing Firebase
+
+### Option 1: Using Swift Package Manager (Recommended)
+1. In Xcode, select File → Add Packages
+
+2. Enter the Firebase iOS SDK repository URL:
+   ```
+   https://github.com/firebase/firebase-ios-sdk
+   ```
+
+3. Select the Firebase products you want to use (e.g., Firebase Analytics)
+
+4. Click "Add Package"
+
+5. Firebase Console Setup:
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project or select existing one
+   - Click "Add app" and select iOS
+   - Enter your app's bundle identifier
+   - Download the `GoogleService-Info.plist` file
+
+6. Add Firebase configuration file:
+   - Drag the downloaded `GoogleService-Info.plist` into your Xcode project navigator
+   - Make sure "Copy items if needed" is checked
+   - Select the appropriate target(s)
+
+### Option 2: Using CocoaPods
 1. Install CocoaPods if not already installed:
    ```bash
    sudo gem install cocoapods
@@ -75,15 +101,3 @@ This will automatically update your project.pbxproj file to include the framewor
    - Go to Build Settings
    - Search for "User Script Sandboxing"
    - Set it to "No"
-
-8. Firebase Console Setup:
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Create a new project or select existing one
-   - Click "Add app" and select iOS
-   - Enter your app's bundle identifier
-   - Download the `GoogleService-Info.plist` file
-
-9. Add Firebase configuration file:
-   - Drag the downloaded `GoogleService-Info.plist` into your Xcode project navigator
-   - Make sure "Copy items if needed" is checked
-   - Select the appropriate target(s)
