@@ -1,63 +1,90 @@
-# MonitaSDK Integration Guide
-This document outlines the steps required to integrate MonitaSDK into your iOS application.
 
-Requirements
-iOS 13.0 or later
+# Monita SDK for iOS
 
-Xcode 12.0 or later
+Monita SDK provides robust monitoring and analytics capabilities for your iOS applications, including request monitoring, analytics integration, and performance tracking.
 
-Swift 5.0 or later
+## Table of Contents
 
+- [Overview](#overview)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+- [Contact](#contact)
 
-Step 1: Install MonitaSDK
-Swift Package Manager (SPM)
-Open your project in Xcode.
+## Overview
 
-Go to File > Add Packages.
+Monita SDK empowers developers with powerful tools to monitor network requests, integrate popular analytics platforms, and track app performance with ease. Designed for seamless integration into your iOS projects, it helps you gain valuable insights into your app’s behavior and performance.
 
-In the search bar, enter the URL of the MonitaSDK repository:
+## Installation
 
+Follow these steps to integrate Monita SDK into your iOS project:
 
-  https://github.com/your_repo/MonitaSDK.git
-  
-Select the appropriate version and click Add Package.
+### Step 1: Add the Package Dependency
 
+1. Open Xcode and navigate to **File > Swift Packages > Add Package Dependency**.
+2. In the search box, enter the URL:  
+   ```
+   https://github.com/rnadigital/monita-ios-sdk.git
+   ```
+3. Click **Next**.
+4. Select the **branch** option and enter `master` as the branch name.
+5. Click **Finish**. The SDK will be added under **Swift Package Dependencies**.
 
-Step 2: Add MonitaSDKToken to Info.plist
-Open your project in Xcode and navigate to your Info.plist file.
-Add a new key called MonitaSDKToken with your SDK token as the value:
+### Step 2: Configure the SDK Token
 
-  `<key>MonitaSDKToken</key>`
-  
-  `<string>Your-Token-Here</string>`
+1. Open your project's `Info.plist` file in Xcode.
+2. Add a new key called `MonitaSDKToken` with your SDK token as the value:
 
-Step 3: Update AppDelegate.swift
-Open your AppDelegate.swift file.
+   ```xml
+   <key>MonitaSDKToken</key>
+   <string>Your-Token-Here</string>
+   ```
 
-Import the MonitaSDK at the top of the file:
+## Usage
 
-swift
-Copy code
+After installing the SDK, initialize it in your application delegate. For example, update your `AppDelegate.swift` as follows:
+
+```swift
 import MonitaSDK
-Add the following line inside the application(_:didFinishLaunchingWithOptions:) method to initialize the SDK:
 
-swift
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-
-    // Configure MonitaSDK
-    
-    MonitaSDK.configure()
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    // Initialize Monita SDK with your custom configuration
+    MonitaSDK.configure(
+        enableLogger: true,
+        batchSize: 10,
+        customerId: "123456",
+        consentString: "Granted",
+        sessionId: "123456",
+        appVersion: "1.0"
+    )
     
     return true
-    
-    }
-    
-Step 4: Run the App
-Build and run your app.
-The MonitaSDK should be successfully integrated, and it will initialize when the app is launched.
-Additional Information
-For more information on how to use the SDK, refer to the official documentation.
-If you encounter any issues, please check the FAQ section or open an issue in our repository.
+}
+```
 
+## Features
 
+- **Automatic Request Monitoring:** Seamlessly track and log network requests.
+- **Analytics Integration:** Integrates with Google Analytics, Facebook Analytics, and Firebase.
+- **Performance Tracking:** Monitor and optimize your app's performance.
+- **Easy Integration:** A straightforward setup process gets you up and running quickly.
+
+## Troubleshooting
+
+If you encounter issues during setup, try resetting your package caches in Xcode:
+
+1. Navigate to **File > Packages > Reset Package Caches**.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+For any questions or support, please reach out to:  
+**support@monita.com**
+```
+
+Once you create and commit this file to your GitHub repository, visitors will have a clear overview of the project, its installation instructions, and usage details.
