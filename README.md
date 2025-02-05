@@ -85,6 +85,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 For any questions or support, please reach out to:  
 **support@monita.com**
-```
 
-Once you create and commit this file to your GitHub repository, visitors will have a clear overview of the project, its installation instructions, and usage details.
