@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:Package.swift">
+   </FileRef>
+   <Group
+      location = "group:Sources"
+      name = "Sources">
+      <Group
+         location = "group:MonitaSDK"
+         name = "MonitaSDK">
+         <Group
+            location = "group:Vendors"
+            name = "Vendors">
+            <FileRef
+               location = "group:Vendor.swift">
+            </FileRef>
+            <FileRef
+               location = "group:Filter.swift">
+            </FileRef>
+            <FileRef
+               location = "group:VendrosConfig.swift">
+            </FileRef>
+         </Group>
+         <Group
+            location = "group:Output"
+            name = "Output">
+            <FileRef
+               location = "group:MonitaLogger.swift">
+            </FileRef>
+         </Group>
+         <Group
+            location = "group:Utils"
+            name = "Utils">
+            <FileRef
+               location = "group:Constant.swift">
+            </FileRef>
+            <Group
+               location = "group:Extension"
+               name = "Extension">
+               <FileRef
+                  location = "group:UserDefaultExtension.swift">
+               </FileRef>
+               <FileRef
+                  location = "group:UIApplicationExtension.swift">
+               </FileRef>
+            </Group>
+         </Group>
+         <FileRef
+            location = "group:MonitaConfiguration.swift">
+         </FileRef>
+         <FileRef
+            location = "group:RequestManager.swift">
+         </FileRef>
+         <FileRef
+            location = "group:FilterManager.swift">
+         </FileRef>
+         <FileRef
+            location = "group:NetShearsInterceptorDelegate.swift">
+         </FileRef>
+         <FileRef
+            location = "group:MonitaNetworkManager.swift">
+         </FileRef>
+         <FileRef
+            location = "group:AppGlobalConfigNew.json">
+         </FileRef>
+         <FileRef
+            location = "group:AppGlobalConfig.json">
+         </FileRef>
+         <FileRef
+            location = "group:MonitaSDK.swift">
+         </FileRef>
+         <Group
+            location = "group:Logging"
+            name = "Logging">
+            <FileRef
+               location = "group:InterceptedRequestStore.swift">
+            </FileRef>
+            <Group
+               location = "group:Models"
+               name = "Models">
+               <FileRef
+                  location = "group:InterceptedRequest.swift">
+               </FileRef>
+               <FileRef
+                  location = "group:MonitaPayload.swift">
+               </FileRef>
+            </Group>
+         </Group>
+      </Group>
+   </Group>
+   <Group
+      location = "group:Tests"
+      name = "Tests">
+      <Group
+         location = "group:MonitaSDKTests"
+         name = "MonitaSDKTests">
+         <FileRef
+            location = "group:MonitaSDKTests.swift">
+         </FileRef>
+      </Group>
+   </Group>
+   <FileRef
+      location = "group:Example/MonitaSDKExample.xcodeproj">
+   </FileRef>
+</Workspace>

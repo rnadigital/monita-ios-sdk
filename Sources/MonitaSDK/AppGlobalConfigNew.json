@@ -1,0 +1,86 @@
+{
+  "monitoringVersion": "23",
+  "vendors": [
+    {
+      "vendorName": "Google Firebase",
+      "urlPatternMatches": [
+        "fcm.googleapis.com",
+        "firebase.com",
+        "firebase.google.com",
+        "firebase.googleapis.com",
+        "firebaseapp.com",
+        "firebaseappcheck.googleapis.com",
+        "firebasedynamiclinks-ipv4.googleapis.com",
+        "firebasedynamiclinks-ipv6.googleapis.com",
+        "firebasedynamiclinks.googleapis.com",
+        "firebaseinappmessaging.googleapis.com",
+        "firebaseinstallations.googleapis.com",
+        "firebaseio.com",
+        "firebaselogging-pa.googleapis.com",
+        "firebaselogging.googleapis.com",
+        "firebaseperusertopics-pa.googleapis.com",
+        "firebaseremoteconfig.googleapis.com",
+        "app-analytics-services",
+      ],
+      "eventParamter": "commerce.items[0].itemNumber",
+      "execludeParameters": [
+        "quantity"
+      ],
+      "filters": [
+        {
+          "key": "itemNumber",
+          "op": "eq",
+          "val": [
+            "ABC123"
+          ]
+        },
+        {
+          "key": "quantity",
+          "op": "ne",
+          "val": [
+            "2.0"
+          ]
+        },
+        {
+          "key": "itemName",
+          "op": "ne",
+          "val": [
+            "Adidas"
+          ]
+        }
+      ],
+      "filtersJoinOperator": "OR"
+    },
+    {
+      "vendorName": "Facebook (Meta Pixel)",
+      "urlPatternMatches": [
+        "facebook",
+        "graph.facebook"
+      ],
+      "eventParamter": "event-ev1",
+      "execludeParameters": [],
+      "filters": []
+    },
+    {
+      "vendorName": "Google AdWords",
+      "urlPatternMatches": [
+        "app-analytics",
+        "googleadservices.com",
+        "googleads.g.doubleclick.net",
+        "pagead2.googleadservices"
+      ],
+      "eventParamter": "label",
+      "execludeParameters": [],
+      "filters": []
+    },
+    {
+      "vendorName": "Adobe Analytics",
+      "urlPatternMatches": [
+        "assets.adobedtm"
+      ],
+      "eventParamter": "events",
+      "execludeParameters": [],
+      "filters": []
+    }
+  ]
+}

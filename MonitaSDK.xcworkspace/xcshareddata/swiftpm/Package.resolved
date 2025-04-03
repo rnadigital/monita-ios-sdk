@@ -1,0 +1,24 @@
+{
+  "originHash" : "7f6b81cdb1ef21c02edd04871cbcf66564b9314603f328aec462312fdd79534e",
+  "pins" : [
+    {
+      "identity" : "gzipswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/1024jp/GzipSwift",
+      "state" : {
+        "revision" : "56bf51fdd2fe4b2cf254b2cf34aede3d7caccc6c",
+        "version" : "6.1.0"
+      }
+    },
+    {
+      "identity" : "netshears",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/divar-ir/NetShears.git",
+      "state" : {
+        "revision" : "55fed79b310e408e0bd9dae68b5dbb9c86b52597",
+        "version" : "3.6.0"
+      }
+    }
+  ],
+  "version" : 3
+}
