@@ -211,9 +211,9 @@ extension RequestManager {
             "env": "production",
             "et": "1",
             "vid": "1",
-            "cn": "",
-            "sid": "",
-            "cid": MonitaSDK.shared.cid,
+            "cn": configuration?.sid ?? "",
+            "sid": configuration?.sid ?? "",
+            "cid": configuration?.cid ?? "",
             "ev": ""
         ]
         return finalPayload

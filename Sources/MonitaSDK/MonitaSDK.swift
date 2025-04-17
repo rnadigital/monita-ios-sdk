@@ -35,6 +35,8 @@ public class MonitaSDK: @unchecked Sendable {
                           cid: String = "",
                           appVersion: String = "",
                           alternativeURL: String? = nil,
+                          sid: String = "",
+                          consentString: String = "",
                           maxRetries: Int = 3,
                           baseDelay: Double = 1.0) {
         queue.async {
@@ -45,6 +47,8 @@ public class MonitaSDK: @unchecked Sendable {
                 cid: cid,
                 appVersion: appVersion,
                 alternativeURL: alternativeURL,
+                sid: sid,
+                consentString: consentString,
                 maxRetries: maxRetries,
                 baseDelay: baseDelay
             )
@@ -58,6 +62,8 @@ public class MonitaSDK: @unchecked Sendable {
         cid: String,
         appVersion: String,
         alternativeURL: String? = nil,
+        sid: String,
+        consentString: String,
         maxRetries: Int,
         baseDelay: Double
     ) {
@@ -69,7 +75,6 @@ public class MonitaSDK: @unchecked Sendable {
         guard let tokenFromPlist = Bundle.main.infoDictionary?["MonitaSDKToken"] as? String else {
             DispatchQueue.main.async {
                 print("Monita Token not available in plist file. To get a token you must sign up at getmonita.io and add a new domain for monitoring")
-                UIApplication.showAlert(message: "Monita Token not available in plist file. To get a token you must sign up at getmonita.io and add a new domain for monitoring")
             }
             return
         }
@@ -78,7 +83,7 @@ public class MonitaSDK: @unchecked Sendable {
             MonitaLogger.shared.enableLogging()
         }
         let newURL = alternativeURL ?? nil
-        configuration = MonitaConfiguration(token: tokenFromPlist, endpointPOSTURL: newURL)
+        configuration = MonitaConfiguration(token: tokenFromPlist, endpointPOSTURL: newURL, cid: cid, sid: sid, cn: consentString)
         RequestManager.shared.setConfiguration(configuration: configuration)
         
         checkAndFetchConfiguration()
@@ -172,6 +177,7 @@ public class MonitaSDK: @unchecked Sendable {
     
     private static func startMonitoring() {
         NetShears.shared.startListener()
+        NetShears.shared.startLogger()   
         RequestBroadcast.shared.setDelegate(NetShearsInterceptorDelegate.shared)
     }
     

@@ -13,8 +13,11 @@ final class NetShearsInterceptorDelegate: RequestBroadcastDelegate {
     // Singleton style for testing purposes I would personaly avoid using in not necessary.
     nonisolated(unsafe) static let shared = NetShearsInterceptorDelegate()
     private init() {}
-    
+    // Data Entry point
     func newRequestArrived(_ request: NetShearsRequestModel) {
+        
+        guard request.code != 0 else { return }
+        
         let localURL = request.url
             let localMethod = request.method
             let localCode = request.code
@@ -34,6 +37,7 @@ final class NetShearsInterceptorDelegate: RequestBroadcastDelegate {
             }
     }
     
+    // Proecessing the request.
     private nonisolated static func processRequest(
         url: String,
         method: String,
@@ -46,7 +50,7 @@ final class NetShearsInterceptorDelegate: RequestBroadcastDelegate {
         // Match the vendors by URL pattern
         let matchedVendors = VendorsConfig.shared.matchedVendors(for: url)
             guard !matchedVendors.isEmpty else {
-                MonitaLogger.shared.debug(message: .message("No Vendors Detected"))
+                MonitaLogger.shared.debug(message: .message("No Vendors Detected matching the URL."))
                 return
             }
 

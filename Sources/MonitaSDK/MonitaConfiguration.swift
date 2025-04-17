@@ -22,12 +22,18 @@ struct MonitaConfiguration {
     /// The base delay in seconds for the first retry, doubles each time (1, 2, 4...)
     public var baseDelay: Double
     private var token: String
+    public let cid: String
+    public let sid: String
+    public let cn: String
     
     init(token: String = "",
          endpointPOSTURL: String? = nil,
          environment: String = "Production",
          maxRetries: Int = 3,
-         baseDelay: Double = 1.0) {
+         baseDelay: Double = 1.0,
+         cid: String = "",
+         sid: String = "",
+         cn: String = "") {
         if let endpointPOSTURL {
             self.endpointPOSTURL = endpointPOSTURL
         } else {
@@ -37,6 +43,9 @@ struct MonitaConfiguration {
         self.environment = environment
         self.maxRetries = maxRetries
         self.baseDelay = baseDelay
+        self.cid = cid
+        self.sid = sid
+        self.cn = cn
     }
     
     public func vendorsURL(_ useRefresh: Bool = false) -> URL? {
