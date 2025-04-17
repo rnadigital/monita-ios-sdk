@@ -28,7 +28,22 @@ public class MonitaSDK: @unchecked Sendable {
     
     private init() { }
     
-    // Call this method in AppDelegate's didFinishLaunchingWithOptions
+    /// Configures and starts the Monita SDK.
+    ///
+    /// - Parameters:
+    ///   - fetchLocally: When `true`, falls back to the bundled JSON vendor configuration if the remote fetch fails. Default **false**.
+    ///   - enableLogger: Toggles `MonitaLogger`; set to `true` for debug output in Xcode console. Default **true**.
+    ///   - batchSize: Number of intercepted requests to cache before triggering an upload. Default **10**.
+    ///   - cid: Customer‑ID.
+    ///   - appVersion: Optional host‑app version to include in analytics; not used internally, but stored in payloads.
+    ///   - alternativeURL: Overrides the default upload endpoint (`endpointPOSTURL`). Useful for staging or QA.
+    ///   - sid: Session‑ID (`"sid"` field).
+    ///   - consentString: Consent.
+    ///   - maxRetries: Maximum upload attempts per payload when a request fails. Retries use exponential back‑off. Default **3**.
+    ///   - baseDelay: Initial delay (seconds) for exponential back‑off. Each retry doubles this value. Default **1.0**.
+    ///
+    /// Call this **once**—ideally from *AppDelegate*’s
+    /// `application(_:didFinishLaunchingWithOptions:)`—before network traffic starts.
     public func configure(fetchLocally: Bool = false,
                           enableLogger: Bool = true,
                           batchSize: Int = 10,
