@@ -101,7 +101,4 @@
          </FileRef>
       </Group>
    </Group>
-   <FileRef
-      location = "group:Example/MonitaSDKExample.xcodeproj">
-   </FileRef>
 </Workspace>

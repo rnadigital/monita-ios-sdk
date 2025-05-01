@@ -17,6 +17,10 @@ final class NetShearsInterceptorDelegate: RequestBroadcastDelegate {
     func newRequestArrived(_ request: NetShearsRequestModel) {
         
         guard request.code != 0 else { return }
+        if request.url.contains(MonitaSDK.shared.configuration?.endpointPOSTURL ?? "") {
+            MonitaLogger.shared.debug(message: .message("Skipping request: \(request.url) Not monitoring Monita requests."))
+            return
+        }
         
         let localURL = request.url
             let localMethod = request.method

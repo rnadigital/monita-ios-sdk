@@ -111,7 +111,7 @@ extension RequestManager {
                     return true
                 }
                 // Non-2xx
-                MonitaLogger.shared.debug(message: .message("Non-2xx response. Attempt \(attempt + 1) of \(maxAttempts)."))
+                MonitaLogger.shared.debug(message: .message("Non-2xx response. Attempt \(attempt + 1) of \(maxAttempts), Payload: \(payload)"))
             } catch {
                 // E.g. network error
                 MonitaLogger.shared.debug(message: .message("Error uploading on attempt \(attempt + 1) of \(maxAttempts): \(error)"))

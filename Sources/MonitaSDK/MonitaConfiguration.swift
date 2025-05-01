@@ -8,7 +8,7 @@ import Foundation
 
 struct MonitaConfiguration {
     
-    private let defaultPOSTURLStirng = "https://dev-stream.getmonita.io/api/v1/"
+    private let defaultPOSTURLStirng = "https://dev-stream.raptor.digital/api/v1/"
     
     /// The primary endpoint for posting data to BE
     public var endpointPOSTURL: String

@@ -16,7 +16,7 @@ public class MonitaSDK: @unchecked Sendable {
     
     // Internal background queue (serial) for concurrency safety
     private let queue = DispatchQueue(label: "com.monita.sdk.queue")
-    private var configuration: MonitaConfiguration?
+    var configuration: MonitaConfiguration?
     
     private static let fetchInterval: TimeInterval = 5 * 24 * 60 * 60 // 5 days in seconds
     private var lastFetchDateKey = "LastFetchDate"

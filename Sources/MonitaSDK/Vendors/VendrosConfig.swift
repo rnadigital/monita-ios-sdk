@@ -28,8 +28,9 @@ final class VendorsConfig {
     func matchedVendors(for urlString: String) -> [Vendor] {
         vendors.filter { vendor in
             //Substring match for Vendor URL:
-            vendor.urlPatternMatches?.contains { pattern in
-                urlString.contains(pattern)
+            return vendor.urlPatternMatches?.contains { pattern in
+                MonitaLogger.shared.debug(message: .message("\nMatching URL: \(urlString),against Pattern: \(pattern)"))
+                return urlString.contains(pattern)
             } ?? false
         }
     }
