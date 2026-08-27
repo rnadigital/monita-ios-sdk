@@ -1,0 +1,35 @@
+{
+  "t": "dom_goldentoken123456789012",
+  "dm": "app",
+  "mv": "2.0.0",
+  "sv": "46",
+  "u": "app://com.example.shop/Checkout",
+  "p": "Checkout",
+  "vid": "11111111-2222-4333-8444-555555555555",
+  "sid": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+  "s": "ios-sdk",
+  "do": "com.example.shop",
+  "rl": "ios 17.5",
+  "env": "production",
+  "et": "",
+  "cn": "CPXxRfAPXxRfAAfKABENBUCsAP_AAH_AAAAAJNNf",
+  "cid": "customer-42",
+  "tm": 1724732400.5,
+  "e": "Purchase",
+  "vn": "Facebook (Meta Pixel)",
+  "st": "success",
+  "m": "POST",
+  "vu": "https://www.facebook.com/tr/?id=812&ev=Purchase",
+  "dt": [
+    {
+      "id": "812",
+      "ev": "Purchase",
+      "currency": "USD",
+      "__mon_url": "https://www.facebook.com/tr/?id=812&ev=Purchase",
+      "__mon_host": "www.facebook.com",
+      "__mon_method": "POST",
+      "vendorName": "Facebook (Meta Pixel)"
+    }
+  ],
+  "np": []
+}
