@@ -32,7 +32,7 @@ public struct MonitaConfiguration: Sendable {
 enum MonitaDefaults {
     static let collectEndpoint = "https://collect.monita.ai/api/v1"
     static let configEndpointBase = "https://cdn.monita.ai/custom-config"
-    static let sdkVersion = "2.0.0"
+    static let sdkVersion = "2.0.1"
     static let infoPlistTokenKey = "MonitaSDKToken"
 
     static func configEndpoint(token: String) -> String {

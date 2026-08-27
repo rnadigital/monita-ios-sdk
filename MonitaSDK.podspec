@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'MonitaSDK'
-  s.version          = '2.0.0'
+  s.version          = '2.0.1'
   s.summary          = 'Passive on device vendor network call monitoring for iOS apps.'
   s.description      = <<-DESC
 MonitaSDK observes the vendor and analytics network calls your app already

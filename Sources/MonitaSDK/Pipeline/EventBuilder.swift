@@ -13,6 +13,7 @@ public struct SharedContext: Equatable, Sendable {
     public var vid: String
     public var sid: String
     public var doValue: String
+    public var av: String?
     public var rl: String
     public var env: String
     public var et: String
@@ -28,6 +29,7 @@ public struct SharedContext: Equatable, Sendable {
         vid: String,
         sid: String,
         doValue: String,
+        av: String? = nil,
         rl: String,
         env: String = "production",
         et: String = "",
@@ -42,6 +44,7 @@ public struct SharedContext: Equatable, Sendable {
         self.vid = vid
         self.sid = sid
         self.doValue = doValue
+        self.av = av
         self.rl = rl
         self.env = env
         self.et = et
@@ -58,7 +61,7 @@ public enum EventBuilder {
     /// The envelope keys hoisted out of each event when batching, in the
     /// reference's order.
     public static let batchSharedKeys: [String] = [
-        "t", "dm", "mv", "sv", "u", "p", "vid", "sid", "s", "do", "rl", "env", "et", "cn", "cid",
+        "t", "dm", "mv", "sv", "u", "p", "vid", "sid", "s", "do", "av", "rl", "env", "et", "cn", "cid",
     ]
 
     public static func envelopeObject(_ ctx: SharedContext) -> JSONObject {
@@ -73,6 +76,9 @@ public enum EventBuilder {
         object["sid"] = .string(ctx.sid)
         object["s"] = .string("ios-sdk")
         object["do"] = .string(ctx.doValue)
+        if let av = ctx.av {
+            object["av"] = .string(av)
+        }
         object["rl"] = .string(ctx.rl)
         object["env"] = .string(ctx.env)
         object["et"] = .string(ctx.et)

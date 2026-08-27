@@ -68,6 +68,7 @@ final class EngineIntegrationTests: XCTestCase {
             transport: transport,
             now: { [clock] in clock.now },
             bundleId: "com.example.shop",
+            appVersion: "1.4.2+387",
             osVersion: "ios 17.5",
             installInterceptor: false,
             observeAppLifecycle: false,
@@ -125,6 +126,7 @@ final class EngineIntegrationTests: XCTestCase {
         XCTAssertEqual(payload["u"], .string("app://com.example.shop"))
         XCTAssertEqual(payload["p"], .string(""))
         XCTAssertEqual(payload["do"], .string("com.example.shop"))
+        XCTAssertEqual(payload["av"], .string("1.4.2+387"))
         XCTAssertEqual(payload["rl"], .string("ios 17.5"))
         // Excluded parameter never rides.
         guard case .array(let dt)? = payload["dt"], case .object(let data) = dt[0] else {
@@ -418,7 +420,7 @@ final class EngineIntegrationTests: XCTestCase {
         XCTAssertTrue(snapshot.contains("tcf"))
         XCTAssertTrue(snapshot.contains("os"))
         XCTAssertTrue(snapshot.contains("model"))
-        XCTAssertEqual(snapshot["sdk"], .string("2.0.0"))
+        XCTAssertEqual(snapshot["sdk"], .string("2.0.1"))
         XCTAssertTrue(snapshot.contains("att"))
     }
 

@@ -10,13 +10,14 @@ final class BatcherTests: XCTestCase {
     private func context(cn: String? = nil) -> SharedContext {
         SharedContext(
             token: "dom_batchtoken1234567890123",
-            mv: "2.0.0",
+            mv: "2.0.1",
             sv: "46",
             u: "app://com.example.shop/Checkout",
             p: "Checkout",
             vid: "11111111-2222-4333-8444-555555555555",
             sid: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
             doValue: "com.example.shop",
+            av: "1.4.2+387",
             rl: "ios 17.5",
             cn: cn
         )
@@ -85,12 +86,13 @@ final class BatcherTests: XCTestCase {
         guard case .object(let envelope) = beacons[0].0 else { return XCTFail("not an object") }
         XCTAssertEqual(envelope["t"], .string("dom_batchtoken1234567890123"))
         XCTAssertEqual(envelope["dm"], .string("app"))
-        XCTAssertEqual(envelope["mv"], .string("2.0.0"))
+        XCTAssertEqual(envelope["mv"], .string("2.0.1"))
         XCTAssertEqual(envelope["sv"], .string("46"))
         XCTAssertEqual(envelope["s"], .string("ios-sdk"))
         XCTAssertEqual(envelope["u"], .string("app://com.example.shop/Checkout"))
         XCTAssertEqual(envelope["p"], .string("Checkout"))
         XCTAssertEqual(envelope["do"], .string("com.example.shop"))
+        XCTAssertEqual(envelope["av"], .string("1.4.2+387"))
         XCTAssertEqual(envelope["rl"], .string("ios 17.5"))
         XCTAssertEqual(envelope["env"], .string("production"))
         XCTAssertEqual(envelope["et"], .string(""))

@@ -30,13 +30,14 @@ final class GoldenPayloadTests: XCTestCase {
     private var context: SharedContext {
         SharedContext(
             token: "dom_goldentoken123456789012",
-            mv: "2.0.0",
+            mv: "2.0.1",
             sv: "46",
             u: "app://com.example.shop/Checkout",
             p: "Checkout",
             vid: "11111111-2222-4333-8444-555555555555",
             sid: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
             doValue: "com.example.shop",
+            av: "1.4.2+387",
             rl: "ios 17.5",
             cn: "CPXxRfAPXxRfAAfKABENBUCsAP_AAH_AAAAAJNNf",
             cid: "customer-42"
@@ -110,7 +111,7 @@ final class GoldenPayloadTests: XCTestCase {
         let split = EventBuilder.split(payloads[0])
         XCTAssertEqual(
             split.shared.keys,
-            ["t", "dm", "mv", "sv", "u", "p", "vid", "sid", "s", "do", "rl", "env", "et", "cn", "cid"]
+            ["t", "dm", "mv", "sv", "u", "p", "vid", "sid", "s", "do", "av", "rl", "env", "et", "cn", "cid"]
         )
         XCTAssertEqual(
             split.event.keys,

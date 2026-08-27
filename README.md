@@ -4,7 +4,7 @@ MonitaSDK observes the vendor and analytics network calls your app already makes
 
 Monitoring is passive. The SDK never blocks, mutates, delays, or re-issues a request, never reads response bodies, and every capture path is exception contained. If anything goes wrong inside the SDK, your app's networking behaves exactly as if the SDK were not there.
 
-- Version: 2.0.0
+- Version: 2.0.1
 - Platforms: iOS 14 and later
 - Swift: 5.9 and later
 - Dependencies: none
@@ -23,7 +23,7 @@ Or add it to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/rnadigital/monita-ios-sdk", from: "2.0.0")
+    .package(url: "https://github.com/rnadigital/monita-ios-sdk", from: "2.0.1")
 ]
 ```
 
@@ -65,6 +65,27 @@ Monita.configure()
 4. The queue uploads to the collect endpoint and deletes an event only after the server acknowledges it with a 2xx response. Failed uploads retry with exponential backoff while the network is reachable. Delivery is at least once: in the rare case of a crash between the server's acknowledgement and the local delete, a batch can arrive twice.
 
 Deleting a vendor from your Monita property, pausing monitoring, or removing the property takes effect at the next configuration refresh, and a paused or removed property also clears any queued events.
+
+## Wire fields
+
+Every batch carries a shared envelope with these fields; per event fields (time, event name, vendor, method, URL, status, parameters) ride inside the batch.
+
+| Field | Value |
+| --- | --- |
+| `t` | Your property token. |
+| `dm` | Deployment method, always `app`. |
+| `mv` | SDK version, `2.0.1`. |
+| `sv` | Monitoring configuration version. |
+| `u` | `app://<bundle id>` plus the current screen when set. |
+| `p` | Current screen name, empty until `setScreen` is called. |
+| `vid` / `sid` | SDK generated visitor and session UUIDs. |
+| `s` | Source, always `ios-sdk`. |
+| `do` | The app's bundle identifier. |
+| `av` | App version plus build, `CFBundleShortVersionString` joined with `CFBundleVersion` by `+`, for example `1.4.2+387`. Omitted when the bundle carries neither value. |
+| `rl` | Platform and OS version, for example `ios 17.5`. |
+| `env` | `production`. |
+| `cn` | Detected or supplied consent string, null when none. |
+| `cid` | Your customer id when set via `setCustomerId`. |
 
 ## API reference
 

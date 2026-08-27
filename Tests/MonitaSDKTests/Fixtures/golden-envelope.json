@@ -1,7 +1,7 @@
 {
   "t": "dom_goldentoken123456789012",
   "dm": "app",
-  "mv": "2.0.0",
+  "mv": "2.0.1",
   "sv": "46",
   "u": "app://com.example.shop/Checkout",
   "p": "Checkout",
@@ -9,6 +9,7 @@
   "sid": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
   "s": "ios-sdk",
   "do": "com.example.shop",
+  "av": "1.4.2+387",
   "rl": "ios 17.5",
   "env": "production",
   "et": "",

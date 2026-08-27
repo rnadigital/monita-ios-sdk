@@ -18,6 +18,7 @@ final class MonitaEngine: @unchecked Sendable {
         var transport: HTTPTransport
         var now: @Sendable () -> Double
         var bundleId: String
+        var appVersion: String?
         var osVersion: String
         var installInterceptor: Bool
         var observeAppLifecycle: Bool
@@ -33,6 +34,7 @@ final class MonitaEngine: @unchecked Sendable {
                 transport: URLSessionTransport(),
                 now: { Date().timeIntervalSince1970 },
                 bundleId: Platform.bundleIdentifier(),
+                appVersion: Platform.appVersionString(),
                 osVersion: Platform.osVersionString(),
                 installInterceptor: true,
                 observeAppLifecycle: true,
@@ -542,6 +544,7 @@ final class MonitaEngine: @unchecked Sendable {
             vid: visitorId,
             sid: session?.currentSessionId() ?? "",
             doValue: deps.bundleId,
+            av: deps.appVersion,
             rl: deps.osVersion,
             cn: consent?.currentConsent(),
             cid: customerId

@@ -141,4 +141,22 @@ enum Platform {
     static func bundleIdentifier() -> String {
         Bundle.main.bundleIdentifier ?? "unknown.bundle"
     }
+
+    /// The `av` envelope value: marketing version plus build number joined
+    /// with "+", e.g. "1.4.2+387". When only one of the two Info.plist values
+    /// exists, the version ships alone and a lone build ships as "+build".
+    /// Nil when the bundle carries neither (tests without a host app); the
+    /// field is then omitted from the envelope.
+    static func appVersionString() -> String? {
+        let version = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String)
+            .flatMap { $0.isEmpty ? nil : $0 }
+        let build = (Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String)
+            .flatMap { $0.isEmpty ? nil : $0 }
+        switch (version, build) {
+        case let (v?, b?): return "\(v)+\(b)"
+        case let (v?, nil): return v
+        case let (nil, b?): return "+\(b)"
+        default: return nil
+        }
+    }
 }
